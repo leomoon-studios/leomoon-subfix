@@ -37,10 +37,6 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.copyLbl.setOpenExternalLinks(True)
         self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
         self.ui.copyLbl.setText('<a style="text-decoration:none; color: inherit;" href="http://leomoon.com">© LeoMoon Studios</a>')
-        #font = QtGui.QFont()
-        #font.setFamily('Tahoma')
-        #font.setPointSize(10)
-        #os dependent ui
         if sys.platform.startswith('darwin'): #macos
             self.ui.titleLbl.setFont(QtGui.QFont('Tahoma', 18, QtGui.QFont.Bold))
             self.ui.dropLbl.setFont(QtGui.QFont('Tahoma', 30, QtGui.QFont.Bold))
@@ -101,14 +97,9 @@ class mainUi(QtWidgets.QMainWindow):
     ###############################################################################
 
     def _convert(self, cfile, fencoding='windows-1256', tencoding='UTF-8'):
-        #print(cfile)
         cdir = os.path.dirname(cfile)
         cname = os.path.splitext(os.path.basename(cfile))[0]
         cext = os.path.splitext(os.path.basename(cfile))[1]
-        #print(os.path.basename(cfile)) #filename with extension
-        #print(cdir) #folder name
-        #print(cname) #filename only
-        #print(cext) #extension only
         nfile = cdir+'/'+cname+'_fixed'+cext
         with open(cfile, 'r', encoding=fencoding) as fr:
             try:
@@ -117,7 +108,6 @@ class mainUi(QtWidgets.QMainWindow):
                         if self.ui.fixCbox.isChecked():
                             line = line.replace('ي','ی').replace('ك','ک')
                         fw.write(line[:-1]+'\n')
-                print('done')
                 self.ui.statusLbl.setText('<span style="color:green;">All done ['+time.strftime('%H:%M:%S')+']'+'</span>')
             except ValueError as e:
                 self.ui.statusLbl.setText('<span style="color:red;">Encoding not supported ['+time.strftime('%H:%M:%S')+']'+'</span>')
