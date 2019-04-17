@@ -1,0 +1,25 @@
+AppName='LeoMoon SubFix'
+BuildVer='1.0.0'
+#cleanup old build if any
+rm -rf "`pwd`/__pycache__"
+rm -rf "`pwd`/build"
+rm -rf "`pwd`/dist/build"
+rm -rf "`pwd`/dist/$AppName.app"
+rm -rf "`pwd`/dist/$AppName"
+#build python
+python3 -m PyInstaller --clean --windowed --onefile --noupx --name "$AppName" --icon=main.icns main.py
+#mods
+sed -i '' 's/<\/dict>/<key>NSHighResolutionCapable<\/key><true\/><\/dict>/g' "`pwd`/dist/$AppName.app/Contents/Info.plist"
+sed -i '' 's/<string>0.0.0<\/string>/<string>'$BuildVer'<\/string><key>CFBundleVersion<\/key><string>'$BuildVer'<\/string>/' "`pwd`/dist/$AppName.app/Contents/Info.plist"
+#cleanup
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/include"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/lib"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/lib2to3"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/PyQt5/Qt/translations"
+rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/include"
+rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib"
+rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib2to3"
+rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/translations"
+#build setup
+/usr/local/bin/packagesbuild -v "`pwd`/dist/setupgen.pkgproj"
+open "`pwd`/dist/build"

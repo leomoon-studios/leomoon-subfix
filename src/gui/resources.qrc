@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="res">
+    <file>icons/main.png</file>
+  </qresource>
+  <qresource prefix="fonts">
+    <file>fonts/Roboto-Black.ttf</file>
+    <file>fonts/Roboto-Regular.ttf</file>
+    <file>fonts/Tahoma-Bold.ttf</file>
+    <file>fonts/Tahoma-Regular.ttf</file>
+  </qresource>
+</RCC>
