@@ -31,7 +31,6 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.verLbl.setText('v'+self.ver)
         self.ui.verLbl.setStyleSheet("QLabel {color:white;}")
         self.ui.dropLbl.setStyleSheet("QLabel {color:grey;}")
-        self.statusBar().setSizeGripEnabled(False) #disable resize arrow
         #prepare status bar
         self.ui.statusLbl.setText('<span style="color:black;">Ready.</span>')
         self.ui.copyLbl.setOpenExternalLinks(True)
