@@ -7,7 +7,6 @@ import sys
 import time #date and time
 import os.path #file check
 import platform #detect os platform
-from os import stat, remove #decrypt
 import random
 from pathlib import Path #home directory
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
