@@ -1,4 +1,3 @@
-#!usr/bin/env python
 #-*- coding: utf-8 -*-
 
 #todo
@@ -24,7 +23,9 @@ class mainUi(QtWidgets.QMainWindow):
         self.setAcceptDrops(True) #accept file drops
         self.ui = Ui_main()
         self.ui.setupUi(self)
-        self.setFixedSize(401, 286) #no resize
+		#disable resizing
+        self.setFixedSize(self.width(), self.height())
+        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.MSWindowsFixedSizeDialogHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)
         self.setWindowTitle(self.title)
         self.ui.titleLbl.setText(self.title)
         self.ui.verLbl.setText('v'+self.ver)
