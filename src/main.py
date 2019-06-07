@@ -83,13 +83,7 @@ class mainUi(QtWidgets.QMainWindow):
     ###############################################################################
 
     def _dropOpen(self):
-        self.ui.decFileInp.setText('') #set text to nothing first
         self.filename = self.dropname
-        if self.filename and os.path.exists(self.filename[0]):
-            self.ui.encFileInp.setText(self.filename[0])
-            self.ui.decFileInp.setText(self.filename[0])
-        else:
-            self.ui.editorEdit.setFocus()
 
     ###############################################################################
     ####### Functions #############################################################
