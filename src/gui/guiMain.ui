@@ -271,7 +271,7 @@ QLabel#verLbl {color: white;}</string>
           </font>
          </property>
          <property name="text">
-          <string>Raplace «ي» with «ی» and «ك» with «ک»</string>
+          <string>Replace «ي» with «ی» and «ك» with «ک»</string>
          </property>
          <property name="checked">
           <bool>true</bool>

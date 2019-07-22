@@ -155,7 +155,7 @@ class Ui_main(object):
         self.titleLbl.setText(_translate("main", "Title"))
         self.verLbl.setText(_translate("main", "1.0.0"))
         self.dropLbl.setText(_translate("main", "Drop SRT file here"))
-        self.fixCbox.setText(_translate("main", "Raplace «ي» with «ی» and «ك» with «ک»"))
+        self.fixCbox.setText(_translate("main", "Replace «ي» with «ی» and «ك» with «ک»"))
         self.statusLbl.setText(_translate("main", "Ready."))
         self.copyLbl.setText(_translate("main", "© LeoMoon Studios"))
 
