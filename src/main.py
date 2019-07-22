@@ -18,7 +18,7 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use h
 class mainUi(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         self.title = 'LeoMoon SubFix'
-        self.ver = '2.0.0'
+        self.ver = '2.0.1'
         QtWidgets.QWidget.__init__(self, None)
         self.setAcceptDrops(True) #accept file drops
         self.ui = Ui_main()
