@@ -1,9 +1,9 @@
 <RCC>
   <qresource prefix="res">
     <file>icons/main.png</file>
-  </qresource>
-  <qresource prefix="fonts">
-    <file>fonts/Tahoma-Bold.ttf</file>
-    <file>fonts/Tahoma-Regular.ttf</file>
+    <file>fonts/Vazir.ttf</file>
+    <file>fonts/Vazir-Black.ttf</file>
+    <file>fonts/Vazir-Bold.ttf</file>
+    <file>fonts/Vazir-FD.ttf</file>
   </qresource>
 </RCC>

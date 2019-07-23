@@ -31,18 +31,20 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.verLbl.setText('v'+self.ver)
         self.ui.verLbl.setStyleSheet("QLabel {color:white;}")
         self.ui.dropLbl.setStyleSheet("QLabel {color:grey;}")
+        self.ui.titleLbl.setFont(QtGui.QFont('Vazir', 15, QtGui.QFont.Black))
+        self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 30, QtGui.QFont.Black))
         #prepare status bar
         self.ui.statusLbl.setText('<span style="color:black;">Ready.</span>')
         self.ui.copyLbl.setOpenExternalLinks(True)
         self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
         self.ui.copyLbl.setText('<a style="text-decoration:none; color: inherit;" href="http://leomoon.com">© LeoMoon Studios</a>')
         if sys.platform.startswith('darwin'): #macos
-            self.ui.titleLbl.setFont(QtGui.QFont('Tahoma', 18, QtGui.QFont.Bold))
-            self.ui.dropLbl.setFont(QtGui.QFont('Tahoma', 30, QtGui.QFont.Bold))
-            self.ui.verLbl.setFont(QtGui.QFont('Tahoma', 13))
-            self.ui.fixCbox.setFont(QtGui.QFont('Tahoma', 13))
-            self.ui.copyLbl.setFont(QtGui.QFont('Tahoma', 13))
-            self.ui.statusLbl.setFont(QtGui.QFont('Tahoma', 13))
+            self.ui.titleLbl.setFont(QtGui.QFont('Vazir', 20, QtGui.QFont.Black))
+            self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 35, QtGui.QFont.Black))
+            self.ui.verLbl.setFont(QtGui.QFont('Vazir', 15))
+            self.ui.fixCbox.setFont(QtGui.QFont('Vazir', 15))
+            self.ui.copyLbl.setFont(QtGui.QFont('Vazir', 15))
+            self.ui.statusLbl.setFont(QtGui.QFont('Vazir', 15))
 
     ###############################################################################
     ####### File Drop #############################################################
@@ -101,8 +103,10 @@ class mainUi(QtWidgets.QMainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Tahoma-Bold.ttf') #add custom font no install
-    QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Tahoma-Regular.ttf') #add custom font no install
+    QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Vazir.ttf') #add custom font no install
+    QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Vazir-Black.ttf') #add custom font no install
+    #QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Vazir-Bold.ttf') #add custom font no install
+    #QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Vazir-FD.ttf') #add custom font no install
     main = mainUi()
     main.show()
     sys.exit(app.exec_())
