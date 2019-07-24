@@ -4,8 +4,10 @@ rmdir "%cd%\dist\build\" /s/q
 rmdir "%cd%\dist\%AppName%\" /s/q
 rmdir "%cd%\__pycache__\" /s/q
 ::define multiple paths using semicolon
-C:\Python\python -m PyInstaller --paths C:\Python\Lib\site-packages\PyQt5\Qt\bin --add-binary *.dll;. --clean --windowed --onefile --noupx --name "%AppName%" --version-file=version.txt --icon=main.ico main.py
+::--paths C:\Python\Lib\site-packages\PyQt5\Qt\bin
+C:\Python\python -m PyInstaller --add-binary *.dll;. --clean --windowed --onefile --noupx --name "%AppName%" --version-file=version.txt --icon=main.ico main.py
 ::cleanup
+rmdir "%cd%\dist\%AppName%\PyQt5\Qt\bin\" /s/q
 rmdir "%cd%\dist\%AppName%\PyQt5\Qt\translations\" /s/q
 rmdir "%cd%\dist\%AppName%\adodbapi\" /s/q
 rmdir "%cd%\dist\%AppName%\Demos\" /s/q

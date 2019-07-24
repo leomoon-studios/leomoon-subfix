@@ -40,11 +40,11 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.copyLbl.setText('<a style="text-decoration:none; color: inherit;" href="http://leomoon.com">© LeoMoon Studios</a>')
         if sys.platform.startswith('darwin'): #macos
             self.ui.titleLbl.setFont(QtGui.QFont('Vazir', 20, QtGui.QFont.Black))
-            self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 35, QtGui.QFont.Black))
-            self.ui.verLbl.setFont(QtGui.QFont('Vazir', 15))
-            self.ui.fixCbox.setFont(QtGui.QFont('Vazir', 15))
-            self.ui.copyLbl.setFont(QtGui.QFont('Vazir', 15))
-            self.ui.statusLbl.setFont(QtGui.QFont('Vazir', 15))
+            self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 40, QtGui.QFont.Black))
+            self.ui.verLbl.setFont(QtGui.QFont('Vazir', 13))
+            self.ui.fixCbox.setFont(QtGui.QFont('Vazir', 13))
+            self.ui.copyLbl.setFont(QtGui.QFont('Vazir', 13))
+            self.ui.statusLbl.setFont(QtGui.QFont('Vazir', 13))
 
     ###############################################################################
     ####### File Drop #############################################################

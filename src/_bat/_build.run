@@ -15,10 +15,12 @@ sed -i '' 's/<string>0.0.0<\/string>/<string>'$BuildVer'<\/string><key>CFBundleV
 rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/include"
 rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/lib"
 rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/lib2to3"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/PyQt5/Qt/bin"
 rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/PyQt5/Qt/translations"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/include"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib2to3"
+rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/bin"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/translations"
 #build setup
 /usr/local/bin/packagesbuild -v "`pwd`/dist/setupgen.pkgproj"
