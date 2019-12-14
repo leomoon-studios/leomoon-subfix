@@ -2,6 +2,8 @@
 !/src
 !LICENSE
 !README.md
+!_sreplace.bat
+!_sreplace.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

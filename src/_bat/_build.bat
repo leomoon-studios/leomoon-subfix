@@ -1,5 +1,5 @@
 ::pre cleanup
-SET "AppName=LeoMoon SubFix"
+SET AppName=LeoMoon SubFix
 rmdir "%cd%\dist\build\" /s/q
 rmdir "%cd%\dist\%AppName%\" /s/q
 rmdir "%cd%\__pycache__\" /s/q
@@ -30,9 +30,20 @@ del "%cd%\dist\%AppName%\pywin32-221-py3.6.egg-info"
 del "%cd%\dist\%AppName%\_ssl.pyd"
 del "%cd%\dist\%AppName%\_hashlib.pyd"
 del "%cd%\dist\%AppName%\mfc140u.dll"
-::build setup
+::prepare
 if not exist "%cd%\dist\%AppName%\" mkdir "%cd%\dist\%AppName%\"
 if exist "%cd%\dist\%AppName%.exe" move "%cd%\dist\%AppName%.exe" "%cd%\dist\%AppName%\"
+::sign app
+SET sign=%cd%\signtool\signtool.exe
+SET pfx=%cd%\signtool\cert.pfx
+SET /p pass=<%cd%\signtool\cert.txt
+SET url=https://leomoon.com
+SET app=%cd%\dist\%AppName%\%AppName%.exe
+"%sign%" sign /fd SHA256 /d "%AppName%" /du "%url%" /f "%pfx%" /p %pass% /t "http://timestamp.comodoca.com/authenticode" "%app%"
+::build setup
 "C:\Program Files (x86)\Inno Setup 5\ISCC.exe" "%cd%\dist\setupgen.iss"
+::sign setup
+FOR %%i IN ("%cd%\dist\build\*.exe") DO SET setup=%%i
+"%sign%" sign /fd SHA256 /d "%AppName% Setup" /du "%url%" /f "%pfx%" /p %pass% /t "http://timestamp.comodoca.com/authenticode" "%setup%"
 explorer "%cd%\dist\build"
 pause
