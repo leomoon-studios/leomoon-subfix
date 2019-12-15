@@ -8,7 +8,6 @@ robocopy lib\ ..\builds\%osBuild%\lib\ *.py /v /s
 robocopy gui\ ..\builds\%osBuild%\gui\ *.py /v
 robocopy gui\fonts\ ..\builds\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\builds\%osBuild%\dist\Fonts\ *.ttf /v
-
 ::os specific
 robocopy .\ ..\builds\%osBuild%\ *.dylib /v
 robocopy gui\icons\ ..\builds\%osBuild%\ main.icns /v
@@ -28,6 +27,8 @@ robocopy .\ ..\builds\%osBuild%\ version.txt /v
 robocopy gui\icons\ ..\builds\%osBuild%\ main.ico /v
 robocopy _bat\ ..\builds\%osBuild%\ _build.bat /v
 robocopy _setup\ ..\builds\%osBuild%\dist\ /XF setupgen.pkgproj /v
+::sign
+robocopy ..\..\..\#code-sign\signtool\ ..\builds\%osBuild%\signtool\ *.* /v
 
 ::lin build copy
 SET osBuild=lin
