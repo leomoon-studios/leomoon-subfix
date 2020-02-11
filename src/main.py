@@ -12,13 +12,16 @@ from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
 from gui.guiMain import Ui_main
 
+#version: 2.0.3
+
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
 
+title = 'LeoMoon SubFix'
+ver = '1.0.0'
+
 class mainUi(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        self.title = 'LeoMoon SubFix'
-        self.ver = '2.0.2'
         QtWidgets.QWidget.__init__(self, None)
         self.setAcceptDrops(True) #accept file drops
         self.ui = Ui_main()
@@ -26,9 +29,9 @@ class mainUi(QtWidgets.QMainWindow):
 		#disable resizing
         self.setFixedSize(self.width(), self.height())
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.MSWindowsFixedSizeDialogHint | QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)
-        self.setWindowTitle(self.title)
-        self.ui.titleLbl.setText(self.title)
-        self.ui.verLbl.setText('v'+self.ver)
+        self.setWindowTitle(title)
+        self.ui.titleLbl.setText(title)
+        self.ui.verLbl.setText('v'+ver)
         self.ui.verLbl.setStyleSheet("QLabel {color:white;}")
         self.ui.dropLbl.setStyleSheet("QLabel {color:grey;}")
         self.ui.titleLbl.setFont(QtGui.QFont('Vazir', 15, QtGui.QFont.Black))

@@ -7,7 +7,7 @@ rm -rf "`pwd`/dist/build"
 rm -rf "`pwd`/dist/$AppName.app"
 rm -rf "`pwd`/dist/$AppName"
 #build python
-python3 -m PyInstaller --clean --windowed --onefile --noupx --name "$AppName" --icon=main.icns main.py
+python3 -m PyInstaller --exclude-module tkinter --clean --windowed --onedir --noupx --name "$AppName" --icon=main.icns main.py
 #mods
 sed -i '' 's/<\/dict>/<key>NSHighResolutionCapable<\/key><true\/><\/dict>/g' "`pwd`/dist/$AppName.app/Contents/Info.plist"
 sed -i '' 's/<string>0.0.0<\/string>/<string>'$BuildVer'<\/string><key>CFBundleVersion<\/key><string>'$BuildVer'<\/string>/' "`pwd`/dist/$AppName.app/Contents/Info.plist"
@@ -22,6 +22,12 @@ rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib2to3"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/bin"
 rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/translations"
+#pyqt 5.14.1 cleanup
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/cryptography-2.8-py3.8.egg-info"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtNetwork"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtQml"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtQmlModels"
+rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtQuick"
 #build setup
 /usr/local/bin/packagesbuild -v "`pwd`/dist/setupgen.pkgproj"
 open "`pwd`/dist/build"

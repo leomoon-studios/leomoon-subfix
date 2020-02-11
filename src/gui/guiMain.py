@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'guiMain.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -113,7 +113,7 @@ class Ui_main(object):
         self.statusFrm.setMinimumSize(QtCore.QSize(0, 31))
         self.statusFrm.setMaximumSize(QtCore.QSize(16777215, 31))
         font = QtGui.QFont()
-        font.setFamily("Tahoma")
+        font.setFamily("Vazir")
         font.setPointSize(10)
         self.statusFrm.setFont(font)
         self.statusFrm.setFrameShape(QtWidgets.QFrame.NoFrame)
