@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file 'guiMain.ui'
 #
-# Created by: PyQt5 UI code generator 5.10.1
+# Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_main(object):
     def setupUi(self, main):
@@ -160,5 +162,4 @@ class Ui_main(object):
         self.fixCbox.setText(_translate("main", "Replace «ي» with «ی» and «ك» with «ک»"))
         self.statusLbl.setText(_translate("main", "Ready."))
         self.copyLbl.setText(_translate("main", "© LeoMoon Studios"))
-
 import resources_rc

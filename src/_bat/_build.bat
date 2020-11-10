@@ -5,7 +5,7 @@ rmdir "%cd%\dist\%AppName%\" /s/q
 rmdir "%cd%\__pycache__\" /s/q
 ::define multiple paths using semicolon
 ::--paths C:\Python\Lib\site-packages\PyQt5\Qt\bin
-C:\Python\python -m PyInstaller --add-binary *.dll;. --clean --exclude-module tkinter --add-binary *.dll;. --windowed --onedir --noupx --name "%AppName%" --version-file=version.txt --icon=main.ico main.py
+C:\Python\python -m PyInstaller --add-binary *.dll;. --clean --exclude-module tkinter --exclude-module _asyncio --exclude-module _bz2 --exclude-module _decimal --exclude-module _elementtree --exclude-module _hashlib --exclude-module _lzma --exclude-module _multiprocessing --exclude-module _overlapped --exclude-module _queue --exclude-module _testcapi --windowed --onedir --noupx --name "%AppName%" --version-file=version.txt --icon=main.ico main.py
 ::pyi-makespec --exclude-module tkinter --add-binary *.dll;. --windowed --onefile --noupx --name "%AppName%" --version-file=version.txt --icon=main.ico main.py
 ::C:\Python\python specFix.py "%AppName%.spec"
 ::timeout /t 1 /nobreak
@@ -31,19 +31,21 @@ del "%cd%\dist\%AppName%\PyWin32.chm"
 del "%cd%\dist\%AppName%\pywin32.pth"
 del "%cd%\dist\%AppName%\pywin32.version.txt"
 del "%cd%\dist\%AppName%\pywin32-221-py3.6.egg-info"
-::del "%cd%\dist\%AppName%\_ssl.pyd"
-del "%cd%\dist\%AppName%\_hashlib.pyd"
 del "%cd%\dist\%AppName%\mfc140u.dll"
 ::pyqt 5.14.1 cleanup
 rmdir "%cd%\dist\%AppName%\cryptography-2.8-py3.8.egg-info" /s/q
+rmdir "%cd%\dist\%AppName%\tk" /s/q
+rmdir "%cd%\dist\%AppName%\tcl" /s/q
 del "%cd%\dist\%AppName%\d3dcompiler_47.dll"
+del "%cd%\dist\%AppName%\libcrypto-1_1.dll"
+del "%cd%\dist\%AppName%\libEGL.dll"
+del "%cd%\dist\%AppName%\libGLESv2.dll"
 del "%cd%\dist\%AppName%\opengl32sw.dll"
 del "%cd%\dist\%AppName%\Qt5Network.dll"
 del "%cd%\dist\%AppName%\Qt5Qml.dll"
 del "%cd%\dist\%AppName%\Qt5QmlModels.dll"
 del "%cd%\dist\%AppName%\Qt5Quick.dll"
-del "%cd%\dist\%AppName%\libGLESv2.dll"
-del "%cd%\dist\%AppName%\libcrypto-1_1.dll"
+del "%cd%\dist\%AppName%\Qt5WebSockets.dll"
 ::prepare
 if not exist "%cd%\dist\%AppName%\" mkdir "%cd%\dist\%AppName%\"
 if exist "%cd%\dist\%AppName%.exe" move "%cd%\dist\%AppName%.exe" "%cd%\dist\%AppName%\"
