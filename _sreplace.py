@@ -27,10 +27,10 @@ def _sReplace(filename, search, replace, unixEol=False):
             f.write(fileContents)
             f.close()
 
-_sReplace( 'builds/win/main.py', '1.0.0', version, False) #main.py win
-_sReplace( 'builds/win/version.txt', '1, 0, 0, 0', versionComma, False) #version.txt
-_sReplace( 'builds/win/dist/setupgen.iss', '1.0.0', version, False) #setupgen.iss
-_sReplace( 'builds/osx/main.py', '1.0.0', version, False) #main.py osx
-_sReplace( 'builds/osx/_build.run', '1.0.0', version, True) #_build.run
-_sReplace( 'builds/osx/dist/setupgen.pkgproj', '1.0.0', version, True) #setupgen.pkgproj
-_sReplace( 'builds/lin/main.py', '1.0.0', version, False) #main.py win
+_sReplace( 'build/win/main.py', '1.0.0', version, False) #main.py win
+_sReplace( 'build/win/version.txt', '1, 0, 0, 0', versionComma, False) #version.txt
+_sReplace( 'build/win/dist/setupgen.iss', '1.0.0', version, False) #setupgen.iss
+_sReplace( 'build/osx/main.py', '1.0.0', version, False) #main.py osx
+_sReplace( 'build/osx/_build.run', '1.0.0', version, True) #_build.run
+_sReplace( 'build/osx/dist/setupgen.pkgproj', '1.0.0', version, True) #setupgen.pkgproj
+_sReplace( 'build/lin/main.py', '1.0.0', version, False) #main.py win

@@ -19,7 +19,7 @@ AppPublisherURL={#AppWebsite}
 AppSupportURL={#AppWebsite}
 AppUpdatesURL={#AppWebsite}
 AppCopyright=Copyright (C) 2018 LeoMoon Studios
-DefaultDirName={pf}\{#AppName}
+DefaultDirName={commonpf}\{#AppName}
 DisableDirPage=yes
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
@@ -31,6 +31,7 @@ Compression=lzma/ultra
 InternalCompressLevel=ultra
 SolidCompression=yes
 DirExistsWarning=yes
+UninstallDisplayIcon={app}\{#AppExeName}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

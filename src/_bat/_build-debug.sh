@@ -6,7 +6,7 @@ rm -rf "`pwd`/dist/build"
 rm -rf "`pwd`/dist/$AppName"
 #build python
 #/usr/lib/x86_64-linux-gnu/qt5/bin
-python3.8 -m PyInstaller --exclude-module tkinter --exclude-module _asyncio --exclude-module _bz2 --exclude-module _decimal --exclude-module _elementtree --exclude-module _hashlib --exclude-module _lzma --exclude-module _multiprocessing --exclude-module _overlapped --exclude-module _queue --exclude-module _testcapi --clean --windowed --onedir --noupx --name "$AppName" --icon=main.ico main.py
+python3.8 -m PyInstaller --exclude-module tkinter --exclude-module _asyncio --exclude-module _bz2 --exclude-module _decimal --exclude-module _elementtree --exclude-module _hashlib --exclude-module _lzma --exclude-module _multiprocessing --exclude-module _overlapped --exclude-module _queue --exclude-module _testcapi --clean --debug=all --onedir --noupx --name "$AppName" --icon=main.ico main.py
 rm -rf "`pwd`/dist/$AppName/PyQt5/Qt/bin"
 rm -rf "`pwd`/dist/$AppName/PyQt5/Qt/translations"
 rm -rf "`pwd`/dist/$AppName/include"
