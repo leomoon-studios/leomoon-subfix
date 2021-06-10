@@ -4,7 +4,7 @@ rmdir ..\build\ /s/q
 ::osx build copy
 SET osBuild=osx
 robocopy .\ ..\build\%osBuild%\ *.py /v
-robocopy lib\ ..\build\%osBuild%\lib\ *.py /v /s
+robocopy ext\ ..\build\%osBuild%\ext\ *.py /v /s
 robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
 robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
@@ -17,7 +17,7 @@ robocopy _setup\ ..\build\%osBuild%\dist\ setupgen.pkgproj /v
 ::win build copy
 SET osBuild=win
 robocopy .\ ..\build\%osBuild%\ *.py /v
-robocopy lib\ ..\build\%osBuild%\lib\ *.py /v /s
+robocopy ext\ ..\build\%osBuild%\ext\ *.py /v /s
 robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
 robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
@@ -33,7 +33,7 @@ robocopy ..\..\..\#code-sign\signtool\ ..\build\%osBuild%\signtool\ *.* /v
 ::lin build copy
 SET osBuild=lin
 robocopy .\ ..\build\%osBuild%\ *.py /v
-robocopy lib\ ..\build\%osBuild%\lib\ *.py /v /s
+robocopy ext\ ..\build\%osBuild%\ext\ *.py /v /s
 robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
 robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
