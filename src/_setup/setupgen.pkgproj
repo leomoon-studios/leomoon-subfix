@@ -831,7 +831,7 @@
 				</dict>
 			</array>
 			<key>NAME</key>
-			<string>LeoMoon SubFix</string>
+			<string>leomoon-subfix_mac</string>
 			<key>PAYLOAD_ONLY</key>
 			<false/>
 			<key>TREAT_MISSING_PRESENTATION_DOCUMENTS_AS_WARNING</key>
