@@ -7,7 +7,7 @@ rm -rf "`pwd`/dist/build"
 rm -rf "`pwd`/dist/$AppName.app"
 rm -rf "`pwd`/dist/$AppName"
 #build python
-python3 -m PyInstaller --exclude-module tkinter --exclude-module _asyncio --exclude-module _bz2 --exclude-module _decimal --exclude-module _elementtree --exclude-module _hashlib --exclude-module _lzma --exclude-module _multiprocessing --exclude-module _overlapped --exclude-module _queue --exclude-module _testcapi --clean --windowed --onedir --noupx --name "$AppName" --icon=main.icns main.py
+/usr/local/opt/python@3.8/bin/python3 -m PyInstaller --exclude-module tkinter --exclude-module _asyncio --exclude-module _bz2 --exclude-module _decimal --exclude-module _elementtree --exclude-module _hashlib --exclude-module _lzma --exclude-module _multiprocessing --exclude-module _overlapped --exclude-module _queue --exclude-module _testcapi --clean --windowed --onedir --noupx --name "$AppName" --icon=main.icns main.py
 #mods
 sed -i '' 's/<\/dict>/<key>NSHighResolutionCapable<\/key><true\/><\/dict>/g' "`pwd`/dist/$AppName.app/Contents/Info.plist"
 sed -i '' 's/<string>0.0.0<\/string>/<string>'$BuildVer'<\/string><key>CFBundleVersion<\/key><string>'$BuildVer'<\/string>/' "`pwd`/dist/$AppName.app/Contents/Info.plist"
