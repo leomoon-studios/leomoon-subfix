@@ -26,7 +26,7 @@ robocopy .\ ..\build\%osBuild%\ *.dll /v
 robocopy .\ ..\build\%osBuild%\ version.txt /v
 robocopy gui\icons\ ..\build\%osBuild%\ main.ico /v
 robocopy _bat\ ..\build\%osBuild%\ _build.bat /v
-robocopy _setup\ ..\build\%osBuild%\dist\ /XF setupgen.pkgproj /v
+robocopy _setup\ ..\build\%osBuild%\dist\ /XF setupgen.pkgproj /XD deb-package /v
 ::sign
 robocopy ..\..\..\#code-sign\signtool\ ..\build\%osBuild%\signtool\ *.* /v
 
@@ -38,26 +38,11 @@ robocopy gui\ ..\build\%osBuild%\gui\ *.py /v
 robocopy gui\fonts\ ..\build\%osBuild%\gui\fonts\ *.ttf /v
 robocopy _fonts\ ..\build\%osBuild%\dist\Fonts\ *.ttf /v
 ::os specific
-robocopy gui\icons\ ..\build\%osBuild%\ main.ico /v
+robocopy _setup\deb-package\ ..\build\%osBuild%\dist\deb-package\ /e /v
+robocopy gui\icons\ ..\build\%osBuild%\dist\ main.png /v
 robocopy _bat\ ..\build\%osBuild%\ _build.sh /v
 
 ::version change before build
 @echo off
 cd ..
 call _sreplace.bat
-
-::ask to build for windows
-@echo off
-:ask
-echo Do you want to build for Windows? (Y/N)
-SET INPUT=
-SET /P INPUT=Type input: %=%
-If /I "%INPUT%"=="y" goto yes 
-If /I "%INPUT%"=="n" goto no
-echo Incorrect input & goto ask
-:yes
-cd ..\build\win\
-call _build.bat
-:no
-echo Goodbye
-exit

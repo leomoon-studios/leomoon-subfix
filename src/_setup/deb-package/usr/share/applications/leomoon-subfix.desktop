@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=LeoMoon SubFix
+Comment=LeoMoon SubFix
+Exec="/opt/leomoon-subfix/LeoMoon SubFix"
+Terminal=false
+Icon=/opt/leomoon-subfix/main.png
+Type=Application
+Categories=Utility;
+Name[en_CA]=LeoMoon SubFix
