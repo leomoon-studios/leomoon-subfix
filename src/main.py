@@ -23,6 +23,7 @@ ver = '1.0.0'
 class mainUi(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, None)
+        self.themeFlg = False
         self.setAcceptDrops(True) #accept file drops
         self.ui = Ui_main()
         self.ui.setupUi(self)
