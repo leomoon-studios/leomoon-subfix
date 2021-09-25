@@ -37,8 +37,8 @@ class mainUi(QtWidgets.QMainWindow):
         self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 30, QtGui.QFont.Black))
         #prepare status bar
         self.ui.statusLbl.setText('Ready.')
-        self.ui.copyLbl.setOpenExternalLinks(True)
-        self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
+        # self.ui.copyLbl.setOpenExternalLinks(True)
+        # self.ui.copyLbl.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
         self.ui.copyLbl.setText('© LeoMoon Studios')
         # self.ui.copyLbl.setText('<a style="text-decoration:none; color: inherit;" href="http://leomoon.com">© LeoMoon Studios</a>')
         if isDark():
