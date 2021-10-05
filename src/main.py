@@ -12,7 +12,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
 from gui.guiMain import Ui_main
 
-#version: 2.0.5
+#version: 2.0.6
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
