@@ -47,6 +47,9 @@ class mainUi(QtWidgets.QMainWindow):
         if isDark():
             self.themeFlg = False
             self._theme()
+        else:
+            self.themeFlg = True
+            self._theme()
         if sys.platform.startswith('darwin'): #macos
             self.ui.titleLbl.setFont(QtGui.QFont('Vazir', 20, QtGui.QFont.Black))
             self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 40, QtGui.QFont.Black))
