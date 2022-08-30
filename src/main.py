@@ -6,13 +6,13 @@ import sys
 import time #date and time
 import os.path #file check
 # import platform #detect os platform
-from ext.darkdetect import isDark #darkdetect 0.5.0 [ https://github.com/albertosottile/darkdetect ] 20210912
+from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
 # from pathlib import Path #home directory
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
 from gui.guiMain import Ui_main
 
-#version: 2.0.6
+#version: 2.0.7
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True) #enable highdpi scaling
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True) #use highdpi icons
