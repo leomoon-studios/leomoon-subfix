@@ -1,35 +1,18 @@
 AppName='LeoMoon SubFix'
 BuildVer='1.0.0'
-#cleanup old build if any
+# cleanup old build if any
 rm -rf "`pwd`/__pycache__"
 rm -rf "`pwd`/build"
 rm -rf "`pwd`/dist/build"
 rm -rf "`pwd`/dist/$AppName.app"
 rm -rf "`pwd`/dist/$AppName"
-#build python
-/usr/local/opt/python@3.8/bin/python3 -m PyInstaller --exclude-module tkinter --exclude-module _asyncio --exclude-module _bz2 --exclude-module _decimal --exclude-module _elementtree --exclude-module _hashlib --exclude-module _lzma --exclude-module _multiprocessing --exclude-module _overlapped --exclude-module _queue --exclude-module _testcapi --clean --windowed --onedir --noupx --name "$AppName" --icon=main.icns main.py
-#mods
+# build python
+/usr/local/opt/python@3.8/bin/python3 -m PyInstaller --clean --windowed --onedir --noupx --name "$AppName" --icon=main.icns main.py
+# mods
 sed -i '' 's/<\/dict>/<key>NSHighResolutionCapable<\/key><true\/><\/dict>/g' "`pwd`/dist/$AppName.app/Contents/Info.plist"
 sed -i '' 's/<string>0.0.0<\/string>/<string>'$BuildVer'<\/string><key>CFBundleVersion<\/key><string>'$BuildVer'<\/string>/' "`pwd`/dist/$AppName.app/Contents/Info.plist"
-#cleanup
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/include"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/lib"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/lib2to3"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/PyQt5/Qt/bin"
+# cleanup
 rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/PyQt5/Qt/translations"
-rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/include"
-rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib"
-rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/lib2to3"
-rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/bin"
-rm -rf "`pwd`/dist/$AppName.app/Contents/Resources/PyQt5/Qt/translations"
-#pyqt 5.14.1 cleanup
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/cryptography-2.8-py3.8.egg-info"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/libcrypto.1.1.dylib"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtNetwork"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtQml"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtQmlModels"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtQuick"
-rm -rf "`pwd`/dist/$AppName.app/Contents/MacOS/QtWebSockets"
-#build setup
+# build setup
 /usr/local/bin/packagesbuild -v "`pwd`/dist/setupgen.pkgproj"
 open "`pwd`/dist/build"

@@ -1,9 +1,9 @@
 <RCC>
   <qresource prefix="res">
+    <file>icons/drag-drop.svg</file>
     <file>icons/main.png</file>
     <file>fonts/Vazir.ttf</file>
     <file>fonts/Vazir-Black.ttf</file>
-    <file>fonts/Vazir-Bold.ttf</file>
     <file>fonts/Vazir-FD.ttf</file>
   </qresource>
 </RCC>
