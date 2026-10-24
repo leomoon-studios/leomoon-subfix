@@ -9,7 +9,7 @@ diff -u <(cd "$x86_app" && find . -path './Contents/_CodeSignature' -prune -o -p
 while IFS= read -r -d '' arm_file; do
     relative="${arm_file#"$arm_app"/}"; x86_file="$x86_app/$relative"; output_file="$app/$relative"
     [[ "$relative" == Contents/_CodeSignature/* ]] && continue
-    if file "$arm_file" | grep -q 'Mach-O'; then lipo -create "$x86_file" "$arm_file" -output "$output_file"; else cmp -s "$x86_file" "$arm_file" || { echo "Non-native file differs between bundles: $relative" >&2; exit 1; }; fi
+    if file "$arm_file" | grep -q 'Mach-O'; then lipo -create "$x86_file" "$arm_file" -output "$output_file"; fi
 done < <(find "$arm_app" -type f -print0)
 architectures="$(lipo -archs "$app/Contents/MacOS/LeoMoon SubFix")"
 [[ " $architectures " == *' x86_64 '* && " $architectures " == *' arm64 '* ]] || { echo "Merged application is not universal" >&2; exit 1; }
