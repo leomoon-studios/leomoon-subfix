@@ -69,7 +69,7 @@ mkdir -p "$dist_dir"
 appimage="$dist_dir/leomoon-subfix-$version-linux-$architecture.AppImage"
 ARCH="$architecture" APPIMAGE_EXTRACT_AND_RUN=1 "$appimagetool" --runtime-file "$runtime_file" "$app_dir" "$appimage"
 chmod +x "$appimage"
-"$repo_dir/scripts/verify-linux-appimage.sh" "$appimage" "$version" "$architecture"
+bash "$repo_dir/scripts/verify-linux-appimage.sh" "$appimage" "$version" "$architecture"
 
 cat > "$dist_dir/release-manifest.json" <<EOF
 {
