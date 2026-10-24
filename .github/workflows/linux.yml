@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build-test-package:
     name: Build, test, and package (${{ matrix.release_arch }})
-    runs-on: ${{ matrix.release_arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    runs-on: ${{ matrix.release_arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false

@@ -29,7 +29,8 @@ done
 [[ "$commit" =~ ^[0-9a-fA-F]{7,64}$ ]] || { echo "Commit must be a Git SHA" >&2; exit 2; }
 
 stage_dir="$(realpath "$stage_dir")"
-dist_dir="$(realpath -m "$dist_dir")"
+dist_parent="$(cd "$(dirname "$dist_dir")" && pwd -P)"
+dist_dir="$dist_parent/$(basename "$dist_dir")"
 app="$stage_dir/LeoMoon SubFix.app"
 [[ -d "$app" ]] || { echo "Stage directory must contain LeoMoon SubFix.app" >&2; exit 1; }
 [[ -x "$app/Contents/MacOS/LeoMoon SubFix" ]] || { echo "Application bundle is missing its executable" >&2; exit 1; }
