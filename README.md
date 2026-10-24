@@ -1,6 +1,8 @@
 # LeoMoon SubFix
 
-LeoMoon SubFix converts legacy Windows-1256 subtitle files to UTF-8. Downloads and release notes are available from the [LeoMoon SubFix page](https://leomoon.com/downloads/desktop-apps/leomoon-subfix/).
+## Introduction
+
+LeoMoon SubFix converts legacy Windows-1256 subtitle files to UTF-8.
 
 ## Supported packages
 
@@ -40,7 +42,7 @@ QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion .venv
 
 ## Release builds
 
-GitHub Actions builds installers and packages from `release.yml`. Use its `workflow_dispatch` form for a non-publishing platform test. Pushing an annotated `vMAJOR.MINOR.PATCH` tag builds every platform and publishes the release after all packages pass.
+GitHub Actions builds installers and packages from `release.yml`. Use its `workflow_dispatch` form for a non-publishing platform test. Pushing a `vMAJOR.MINOR.PATCH` tag builds every platform and publishes the release after all packages pass.
 
 Windows packages are Inno Setup `.exe` installers, Linux packages are `.AppImage` files, and macOS packages are universal `.dmg` files. The app executable is named `LeoMoon SubFix`; release assets use the stable `leomoon-subfix` slug.
 

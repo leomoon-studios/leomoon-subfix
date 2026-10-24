@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create release metadata from one validated annotated semantic-version tag."""
+"""Create release metadata from one validated semantic-version tag."""
 
 from __future__ import annotations
 
@@ -36,14 +36,17 @@ def parse_tag(tag: str) -> tuple[str, tuple[int, int, int]]:
     return version, tuple(int(match.group(name)) for name in ("version", "minor", "patch"))
 
 
-def annotated_tag_date(tag: str) -> str:
+def tag_date(tag: str) -> str:
     tag_type = git("cat-file", "-t", tag)
-    if tag_type != "tag":
-        raise ValueError(f"{tag} must be an annotated tag, not a lightweight tag.")
-    tag_date = git("for-each-ref", f"refs/tags/{tag}", "--format=%(taggerdate:iso-strict)")
-    if not tag_date:
-        raise ValueError(f"{tag} does not have an annotated tag date.")
-    return normalize_date(tag_date)
+    if tag_type == "tag":
+        date = git("for-each-ref", f"refs/tags/{tag}", "--format=%(taggerdate:iso-strict)")
+    elif tag_type == "commit":
+        date = git("log", "-1", "--format=%cI", f"{tag}^{{commit}}")
+    else:
+        raise ValueError(f"{tag} must resolve to a commit or annotated tag.")
+    if not date:
+        raise ValueError(f"{tag} does not have a usable release date.")
+    return normalize_date(date)
 
 
 def normalize_date(value: str) -> str:
@@ -138,7 +141,7 @@ def main() -> int:
             release_date = args.release_date
             commit_sha = args.commit_sha
         else:
-            release_date = args.release_date or annotated_tag_date(tag)
+            release_date = args.release_date or tag_date(tag)
             commit_sha = args.commit_sha or git("rev-parse", f"{tag}^{{commit}}")
         metadata = metadata_for(tag, release_date=release_date, commit_sha=commit_sha)
     except (subprocess.CalledProcessError, ValueError) as error:

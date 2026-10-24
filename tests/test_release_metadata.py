@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import importlib.util
 from pathlib import Path
 
 
@@ -68,3 +69,21 @@ def test_release_metadata_rejects_a_malformed_tag() -> None:
 
     assert result.returncode == 2
     assert "vMAJOR.MINOR.PATCH" in result.stderr
+
+
+def test_release_metadata_uses_the_commit_date_for_a_lightweight_tag(monkeypatch) -> None:
+    spec = importlib.util.spec_from_file_location("release_metadata", PREPARE_RELEASE_METADATA)
+    assert spec is not None and spec.loader is not None
+    release_metadata = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(release_metadata)
+
+    def fake_git(*arguments: str) -> str:
+        if arguments == ("cat-file", "-t", "v2.1.0"):
+            return "commit"
+        if arguments == ("log", "-1", "--format=%cI", "v2.1.0^{commit}"):
+            return "2026-10-24T07:36:00-07:00"
+        raise AssertionError(arguments)
+
+    monkeypatch.setattr(release_metadata, "git", fake_git)
+
+    assert release_metadata.tag_date("v2.1.0") == "2026-10-24T14:36:00Z"
