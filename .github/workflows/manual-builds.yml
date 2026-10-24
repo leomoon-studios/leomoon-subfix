@@ -129,12 +129,26 @@ jobs:
         shell: pwsh
         run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-windows-x64\leomoon-subfix\LeoMoon SubFix.exe"
 
+      - name: Install Inno Setup
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Package Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          BUILD_VERSION: ${{ inputs.version }}
+          BUILD_DATE: ${{ inputs.release_date }}
+          BUILD_COMMIT: ${{ inputs.commit_sha || github.sha }}
+        run: '& scripts/package-windows.ps1 -StageDirectory "build\manual-windows-x64\leomoon-subfix" -DistDirectory "dist\manual-windows" -Version "$env:BUILD_VERSION" -ReleaseDate "$env:BUILD_DATE" -Commit "$env:BUILD_COMMIT"'
+
       - name: Launch packaged application
         shell: bash
         env:
           BUILD_PLATFORM: ${{ matrix.platform }}
           EXECUTABLE: ${{ matrix.executable }}
-        run: "$PYTHON_BIN" scripts/smoke_bundle.py "build/manual-$BUILD_PLATFORM/leomoon-subfix/$EXECUTABLE"
+        run: '"$PYTHON_BIN" scripts/smoke_bundle.py "build/manual-$BUILD_PLATFORM/leomoon-subfix/$EXECUTABLE"'
 
       - name: Upload build diagnostics and artifacts
         if: always()
@@ -148,3 +162,31 @@ jobs:
             build/manual-${{ matrix.platform }}/.work/pyinstaller/subfix/xref-subfix.html
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Upload Windows installer
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-subfix-windows-installer-${{ github.sha }}
+          path: dist/manual-windows/
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-installer-smoke:
+    name: Windows installer smoke test
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Check out verification scripts
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Download Windows installer
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: leomoon-subfix-windows-installer-${{ github.sha }}
+          path: dist
+
+      - name: Install, upgrade, convert, and uninstall
+        shell: pwsh
+        run: '& scripts/smoke-windows-installer.ps1 -ArtifactDirectory "$env:GITHUB_WORKSPACE\dist" -Version "${{ inputs.version }}"'
