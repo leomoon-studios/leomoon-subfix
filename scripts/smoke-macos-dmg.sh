@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-[[ $# -eq 3 ]] || { echo "Usage: $0 ARTIFACT_DIRECTORY VERSION universal" >&2; exit 2; }
+[[ $# -eq 3 ]] || { echo "Usage: $0 ARTIFACT_DIRECTORY VERSION arm64" >&2; exit 2; }
 artifact_dir="$(cd "$1" && pwd)"
 version="$2"
 architecture="$3"

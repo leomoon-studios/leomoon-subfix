@@ -10,7 +10,7 @@ commit=""
 architecture=""
 
 usage() {
-    echo "Usage: $0 --stage-dir DIR --dist-dir DIR --version VERSION --release-date DATE --commit SHA --architecture universal" >&2
+    echo "Usage: $0 --stage-dir DIR --dist-dir DIR --version VERSION --release-date DATE --commit SHA --architecture arm64" >&2
 }
 
 while (( $# )); do
@@ -29,7 +29,7 @@ done
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Version must be MAJOR.MINOR.PATCH" >&2; exit 2; }
 [[ "$release_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T ]] || { echo "Release date must be ISO 8601" >&2; exit 2; }
 [[ "$commit" =~ ^[0-9a-fA-F]{7,64}$ ]] || { echo "Commit must be a Git SHA" >&2; exit 2; }
-[[ "$architecture" == universal ]] || { echo "Architecture must be universal" >&2; exit 2; }
+[[ "$architecture" == arm64 ]] || { echo "Architecture must be arm64" >&2; exit 2; }
 
 stage_dir="$(realpath "$stage_dir")"
 dist_parent="$(cd "$(dirname "$dist_dir")" && pwd -P)"

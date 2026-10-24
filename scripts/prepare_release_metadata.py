@@ -70,7 +70,7 @@ def metadata_for(
         "windows_file_version": windows_version,
         "windows_setup_filename": f"leomoon-subfix-{version}-windows-x64-setup.exe",
         "linux_appimage_filename": f"leomoon-subfix-{version}-linux-x86_64.AppImage",
-        "macos_dmg_filename": f"leomoon-subfix-{version}-macos-universal.dmg",
+        "macos_dmg_filename": f"leomoon-subfix-{version}-macos-arm64.dmg",
         "release_manifest_filename": f"leomoon-subfix-{version}-manifest.json",
     }
 

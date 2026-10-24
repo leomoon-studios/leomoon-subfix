@@ -15,7 +15,7 @@ on:
         type: choice
         options: [all, linux, windows, macos]
       arch:
-        description: Architecture for Linux and Windows; macOS is ARM64
+        description: Architecture for Linux and Windows; macOS is always ARM64
         required: true
         default: all
         type: choice
@@ -127,7 +127,7 @@ jobs:
       - name: Download verified macOS artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          pattern: leomoon-subfix-macos-universal-*-release-${{ github.sha }}
+          pattern: leomoon-subfix-macos-arm64-*-release-${{ github.sha }}
           path: release-input/macos
 
       - name: Collect individual release assets

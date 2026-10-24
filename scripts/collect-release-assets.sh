@@ -31,7 +31,7 @@ expected_assets=(
     "leomoon-subfix-$version-linux-aarch64.AppImage"
     "leomoon-subfix-$version-windows-x64-setup.exe"
     "leomoon-subfix-$version-windows-arm64-setup.exe"
-    "leomoon-subfix-$version-macos-universal.dmg"
+    "leomoon-subfix-$version-macos-arm64.dmg"
 )
 
 artifacts=()

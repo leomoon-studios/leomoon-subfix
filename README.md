@@ -8,7 +8,7 @@ LeoMoon SubFix converts legacy Windows-1256 subtitle files to UTF-8.
 
 - Windows: x64 and ARM64 Inno Setup installers.
 - Linux: x86_64 and ARM64 AppImages.
-- macOS: one universal DMG containing an x86_64 and ARM64 application.
+- macOS: one Apple Silicon (ARM64) DMG.
 
 ## Development setup
 
@@ -44,6 +44,6 @@ QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion .venv
 
 GitHub Actions builds installers and packages from `release.yml`. Use its `workflow_dispatch` form for a non-publishing platform test. Pushing a `vMAJOR.MINOR.PATCH` tag builds every platform and publishes the release after all packages pass.
 
-Windows packages are Inno Setup `.exe` installers, Linux packages are `.AppImage` files, and macOS packages are universal `.dmg` files. The app executable is named `LeoMoon SubFix`; release assets use the stable `leomoon-subfix` slug.
+Windows packages are Inno Setup `.exe` installers, Linux packages are `.AppImage` files, and macOS packages are ARM64 `.dmg` files. The app executable is named `LeoMoon SubFix`; release assets use the stable `leomoon-subfix` slug.
 
 Developer ID signing and notarization are optional. Configure the macOS GitHub secrets only for protected release runs. Certificates, signing keys, Apple passwords, and GitHub tokens must never be committed to the repository.

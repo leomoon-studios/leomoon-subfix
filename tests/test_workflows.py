@@ -25,7 +25,7 @@ def test_release_asset_collector_requires_each_platform_asset() -> None:
     assert '"leomoon-subfix-$version-linux-aarch64.AppImage"' in collector
     assert '"leomoon-subfix-$version-windows-x64-setup.exe"' in collector
     assert '"leomoon-subfix-$version-windows-arm64-setup.exe"' in collector
-    assert '"leomoon-subfix-$version-macos-universal.dmg"' in collector
+    assert '"leomoon-subfix-$version-macos-arm64.dmg"' in collector
     assert "Expected exactly one release asset" in collector
 
 
@@ -44,6 +44,8 @@ def test_macos_workflow_packages_a_dmg() -> None:
 
     assert "package-macos.sh" in macos
     assert "hdiutil create" in package_script
-    assert '"$architecture" == universal' in package_script
+    assert '"$architecture" == arm64' in package_script
     assert "macos-$architecture.dmg" in package_script
-    assert "merge-macos-universal.sh" in macos
+    assert "runs-on: macos-15" in macos
+    assert "merge-macos-universal.sh" not in macos
+    assert "macos-15-intel" not in macos
