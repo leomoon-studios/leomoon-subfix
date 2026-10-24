@@ -66,6 +66,7 @@ jobs:
           path: bundles/arm64/LeoMoon SubFix.app
       - run: bash scripts/merge-macos-universal.sh "bundles/x86_64/LeoMoon SubFix.app" "bundles/arm64/LeoMoon SubFix.app" build/macos-universal/leomoon-subfix
       - name: Prepare optional signing and notarization
+        id: signing
         env:
           CERTIFICATE_BASE64: ${{ secrets.MACOS_SIGNING_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.MACOS_SIGNING_CERTIFICATE_PASSWORD }}
@@ -74,18 +75,18 @@ jobs:
           NOTARY_TEAM_ID: ${{ secrets.MACOS_NOTARY_TEAM_ID }}
           NOTARY_PASSWORD: ${{ secrets.MACOS_NOTARY_APP_PASSWORD }}
         run: |
-          if [[ -z "$CERTIFICATE_BASE64" ]]; then echo "Unsigned universal DMG: signing certificate is not configured."; exit 0; fi
+          if [[ -z "$CERTIFICATE_BASE64" ]]; then echo "Unsigned universal DMG: signing certificate is not configured."; echo "artifact_label=unsigned" >> "$GITHUB_OUTPUT"; exit 0; fi
           certificate="$RUNNER_TEMP/leomoon-subfix-signing.p12"; keychain="$RUNNER_TEMP/leomoon-subfix-signing.keychain-db"; keychain_password="$(uuidgen)"
           printf '%s' "$CERTIFICATE_BASE64" | base64 --decode > "$certificate"
           security create-keychain -p "$keychain_password" "$keychain"; security unlock-keychain -p "$keychain_password" "$keychain"
           security import "$certificate" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain"; security list-keychains -d user -s "$keychain"
-          echo "SUBFIX_MACOS_CODESIGN_IDENTITY=$APPLICATION_IDENTITY" >> "$GITHUB_ENV"; echo "SUBFIX_MACOS_SIGNING_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          echo "SUBFIX_MACOS_CODESIGN_IDENTITY=$APPLICATION_IDENTITY" >> "$GITHUB_ENV"; echo "SUBFIX_MACOS_SIGNING_KEYCHAIN=$keychain" >> "$GITHUB_ENV"; echo "artifact_label=signed" >> "$GITHUB_OUTPUT"
           if [[ -n "$NOTARY_APPLE_ID" && -n "$NOTARY_TEAM_ID" && -n "$NOTARY_PASSWORD" ]]; then xcrun notarytool store-credentials leomoon-subfix-notary --apple-id "$NOTARY_APPLE_ID" --team-id "$NOTARY_TEAM_ID" --password "$NOTARY_PASSWORD" --keychain "$keychain"; echo "SUBFIX_MACOS_NOTARY_PROFILE=leomoon-subfix-notary" >> "$GITHUB_ENV"; echo "SUBFIX_MACOS_NOTARY_KEYCHAIN=$keychain" >> "$GITHUB_ENV"; fi
       - run: bash scripts/package-macos.sh --stage-dir build/macos-universal/leomoon-subfix --dist-dir dist --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --architecture universal
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: leomoon-subfix-macos-universal-release-${{ github.sha }}
+          name: leomoon-subfix-macos-universal-${{ steps.signing.outputs.artifact_label }}-release-${{ github.sha }}
           path: dist/
           if-no-files-found: error
           retention-days: 14
@@ -101,6 +102,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          name: leomoon-subfix-macos-universal-release-${{ github.sha }}
+          pattern: leomoon-subfix-macos-universal-*-release-${{ github.sha }}
           path: dist
+          merge-multiple: true
       - run: bash scripts/smoke-macos-dmg.sh dist "${{ inputs.version }}" universal
