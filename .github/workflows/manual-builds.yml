@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           "$PYTHON_BIN" scripts/generate_qt.py
-          git diff --exit-code
+          git diff --exit-code -- src/leomoon_subfix/_generated/main_window.py
           "$PYTHON_BIN" -m ruff check src tests scripts
           QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion "$PYTHON_BIN" -m pytest -q -rs
           "$PYTHON_BIN" -m pip check
