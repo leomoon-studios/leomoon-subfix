@@ -1,0 +1,101 @@
+name: Linux
+
+on:
+  workflow_call:
+    inputs:
+      version: { required: true, type: string }
+      release_date: { required: true, type: string }
+      commit: { required: true, type: string }
+      arch: { required: false, default: all, type: string }
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-package:
+    name: Build, test, and package (${{ matrix.release_arch }})
+    runs-on: ${{ matrix.release_arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        release_arch: ${{ fromJSON(inputs.arch == 'x64' && '["x86_64"]' || inputs.arch == 'arm64' && '["aarch64"]' || '["x86_64","aarch64"]') }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Install Linux Qt runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --yes fontconfig libdbus-1-3 libegl1 libfontconfig1 libgl1 libopengl0 libwayland-client0 libwayland-cursor0 libx11-6 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xfixes0 libxcb-xinerama0 xvfb
+
+      - name: Install pinned AppImage tooling
+        shell: bash
+        run: |
+          tool_directory="$RUNNER_TEMP/leomoon-subfix-appimage-tools"
+          mkdir -p "$tool_directory"
+          if [[ "${{ matrix.release_arch }}" == "aarch64" ]]; then
+            appimagetool_sha256=f0837e7448a0c1e4e650a93bb3e85802546e60654ef287576f46c71c126a9158
+            runtime_sha256=00cbdfcf917cc6c0ff6d3347d59e0ca1f7f45a6df1a428a0d6d8a78664d87444
+          else
+            appimagetool_sha256=ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0
+            runtime_sha256=2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d
+          fi
+          appimagetool="$tool_directory/appimagetool-${{ matrix.release_arch }}.AppImage"
+          runtime="$tool_directory/runtime-${{ matrix.release_arch }}"
+          curl --fail --location --retry 3 --output "$appimagetool" "https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-${{ matrix.release_arch }}.AppImage"
+          curl --fail --location --retry 3 --output "$runtime" "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-${{ matrix.release_arch }}"
+          printf '%s  %s\n' "$appimagetool_sha256" "$appimagetool" "$runtime_sha256" "$runtime" | sha256sum --check
+          chmod +x "$appimagetool"
+          echo "APPIMAGETOOL=$appimagetool" >> "$GITHUB_ENV"
+          echo "APPIMAGETOOL_SHA256=$appimagetool_sha256" >> "$GITHUB_ENV"
+          echo "APPIMAGE_RUNTIME=$runtime" >> "$GITHUB_ENV"
+          echo "APPIMAGE_RUNTIME_SHA256=$runtime_sha256" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with: { python-version: "3.12" }
+
+      - name: Create locked project environment
+        shell: bash
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install "uv==0.13.5"
+          .venv/bin/uv sync --all-extras --locked
+
+      - name: Regenerate Qt and test
+        shell: bash
+        run: |
+          .venv/bin/python scripts/generate_qt.py
+          git diff --exit-code -- src/leomoon_subfix/_generated/main_window.py
+          .venv/bin/python -m ruff check src tests scripts
+          QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion .venv/bin/python -m pytest -q -rs
+          .venv/bin/python -m pip check
+
+      - name: Build, package, and verify AppImage
+        shell: bash
+        run: |
+          .venv/bin/python scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir "build/linux-${{ matrix.release_arch }}" --clean
+          bash scripts/package-linux.sh --stage-dir "build/linux-${{ matrix.release_arch }}/leomoon-subfix" --dist-dir "dist" --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --architecture "${{ matrix.release_arch }}" --appimagetool "$APPIMAGETOOL" --appimagetool-sha256 "$APPIMAGETOOL_SHA256" --runtime-file "$APPIMAGE_RUNTIME" --runtime-sha256 "$APPIMAGE_RUNTIME_SHA256"
+          bash scripts/smoke-linux-appimage.sh "dist/leomoon-subfix-${{ inputs.version }}-linux-${{ matrix.release_arch }}.AppImage"
+
+      - name: Retain raw bundle diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: linux-${{ matrix.release_arch }}-failure-diagnostics
+          path: build/linux-${{ matrix.release_arch }}/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Linux release artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-subfix-linux-${{ matrix.release_arch }}-release-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14

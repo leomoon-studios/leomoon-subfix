@@ -100,3 +100,11 @@ coll = COLLECT(
     upx=False,
     name="leomoon-subfix",
 )
+
+if sys.platform == "darwin":
+    app = BUNDLE(
+        coll,
+        name="LeoMoon SubFix.app",
+        icon=str(APPLICATION_ICON),
+        bundle_identifier="com.leomoon.SubFix",
+    )

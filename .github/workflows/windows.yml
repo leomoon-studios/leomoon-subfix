@@ -1,0 +1,125 @@
+name: Windows
+
+on:
+  workflow_call:
+    inputs:
+      version: { required: true, type: string }
+      release_date: { required: true, type: string }
+      commit: { required: true, type: string }
+      arch: { required: false, default: all, type: string }
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-package:
+    name: Build, test, and package (${{ matrix.release_arch }})
+    runs-on: ${{ matrix.release_arch == 'arm64' && 'windows-11-vs2026-arm' || 'windows-2022' }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        release_arch: ${{ fromJSON(inputs.arch == 'x64' && '["x64"]' || inputs.arch == 'arm64' && '["arm64"]' || '["x64","arm64"]') }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with: { python-version: "3.12" }
+
+      - name: Create locked project environment
+        shell: bash
+        run: |
+          python -m venv .venv
+          .venv/Scripts/python.exe -m pip install "uv==0.13.5"
+          .venv/Scripts/uv.exe sync --all-extras --locked
+
+      - name: Configure MSVC dependency tools
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $component = "${{ matrix.release_arch == 'arm64' && 'Microsoft.VisualStudio.Component.VC.Tools.ARM64' || 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64' }}"
+          $installationPath = (& $vswhere -latest -products * -requires $component -property installationPath).Trim()
+          if ([string]::IsNullOrWhiteSpace($installationPath)) { throw "Visual Studio C++ tools were not found" }
+          $devCommand = Join-Path $installationPath "Common7\Tools\VsDevCmd.bat"
+          & cmd.exe /s /c "`"$devCommand`" -no_logo -arch=${{ matrix.release_arch }} -host_arch=${{ matrix.release_arch }} && set" |
+            ForEach-Object {
+              $separator = $_.IndexOf("=")
+              if ($separator -gt 0) {
+                $name = $_.Substring(0, $separator)
+                $value = $_.Substring($separator + 1)
+                if ($name -notmatch '^(GITHUB_|RUNNER_|ACTIONS_)') {
+                  "$name=$value" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                }
+              }
+            }
+
+      - name: Regenerate Qt and test
+        shell: bash
+        run: |
+          .venv/Scripts/python.exe scripts/generate_qt.py
+          git diff --exit-code -- src/leomoon_subfix/_generated/main_window.py
+          .venv/Scripts/python.exe -m ruff check src tests scripts
+          QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion .venv/Scripts/python.exe -m pytest -q -rs
+          .venv/Scripts/python.exe -m pip check
+
+      - name: Build one-directory application
+        shell: bash
+        run: .venv/Scripts/python.exe scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir "build/windows-${{ matrix.release_arch }}" --clean
+
+      - name: Verify Windows PE dependencies
+        shell: pwsh
+        run: scripts/verify-windows-build.ps1 -ApplicationPath "build\windows-${{ matrix.release_arch }}\leomoon-subfix\LeoMoon SubFix.exe" -Architecture "${{ matrix.release_arch }}"
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Package and verify Windows installer
+        shell: pwsh
+        run: '& scripts/package-windows.ps1 -StageDirectory "build\windows-${{ matrix.release_arch }}\leomoon-subfix" -DistDirectory "dist" -Version "${{ inputs.version }}" -ReleaseDate "${{ inputs.release_date }}" -Commit "${{ inputs.commit }}" -Architecture "${{ matrix.release_arch }}"'
+
+      - name: Retain raw bundle diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: windows-${{ matrix.release_arch }}-failure-diagnostics
+          path: build/windows-${{ matrix.release_arch }}/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Windows release artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-subfix-windows-${{ matrix.release_arch }}-release-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  clean-installer-smoke:
+    name: Clean Windows installer smoke test (${{ matrix.release_arch }})
+    needs: build-test-package
+    runs-on: ${{ matrix.release_arch == 'arm64' && 'windows-11-vs2026-arm' || 'windows-2022' }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        release_arch: ${{ fromJSON(inputs.arch == 'x64' && '["x64"]' || inputs.arch == 'arm64' && '["arm64"]' || '["x64","arm64"]') }}
+    steps:
+      - name: Check out verification scripts
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Download Windows release artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: leomoon-subfix-windows-${{ matrix.release_arch }}-release-${{ github.sha }}
+          path: dist
+
+      - name: Install, convert, and uninstall
+        shell: pwsh
+        run: '& scripts/smoke-windows-installer.ps1 -ArtifactDirectory "$env:GITHUB_WORKSPACE\dist" -Version "${{ inputs.version }}" -Architecture "${{ matrix.release_arch }}"'

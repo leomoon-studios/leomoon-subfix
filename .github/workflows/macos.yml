@@ -1,0 +1,68 @@
+name: macOS
+
+on:
+  workflow_call:
+    inputs:
+      version: { required: true, type: string }
+      release_date: { required: true, type: string }
+      commit: { required: true, type: string }
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-package:
+    name: Build, test, and package (arm64)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with: { python-version: "3.12" }
+
+      - name: Create locked project environment
+        shell: bash
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install "uv==0.13.5"
+          .venv/bin/uv sync --all-extras --locked
+
+      - name: Regenerate Qt and test
+        shell: bash
+        run: |
+          .venv/bin/python scripts/generate_qt.py
+          git diff --exit-code -- src/leomoon_subfix/_generated/main_window.py
+          .venv/bin/python -m ruff check src tests scripts
+          QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion .venv/bin/python -m pytest -q -rs
+          .venv/bin/python -m pip check
+
+      - name: Build, package, and verify DMG
+        shell: bash
+        run: |
+          .venv/bin/python scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir build/macos-arm64 --clean
+          .venv/bin/python scripts/smoke_bundle.py "build/macos-arm64/leomoon-subfix/LeoMoon SubFix.app/Contents/MacOS/LeoMoon SubFix"
+          bash scripts/package-macos.sh --stage-dir build/macos-arm64/leomoon-subfix --dist-dir dist --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}"
+
+      - name: Retain raw bundle diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: macos-arm64-failure-diagnostics
+          path: build/macos-arm64/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload macOS release artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-subfix-macos-release-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14

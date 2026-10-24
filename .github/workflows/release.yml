@@ -1,0 +1,165 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to use for test artifacts
+        required: true
+        default: "2.1.0"
+        type: string
+      target:
+        description: Platform to build and test
+        required: true
+        default: all
+        type: choice
+        options: [all, linux, windows, macos]
+      arch:
+        description: Architecture for Linux and Windows; macOS is ARM64
+        required: true
+        default: all
+        type: choice
+        options: [all, x64, arm64]
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release tag
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      release_date: ${{ steps.metadata.outputs.release_date }}
+      commit: ${{ steps.metadata.outputs.commit }}
+      release_tag: ${{ steps.metadata.outputs.release_tag }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Generate release metadata
+        id: metadata
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            release_tag="v${{ inputs.version }}"
+            release_date="$(date --utc +'%Y-%m-%dT%H:%M:%SZ')"
+            python scripts/prepare_release_metadata.py --tag "$release_tag" --release-date "$release_date" --commit-sha "$GITHUB_SHA" --allow-unverified-tag --output release-metadata.json
+          else
+            release_tag="$GITHUB_REF_NAME"
+            python scripts/prepare_release_metadata.py --tag "$release_tag" --output release-metadata.json
+          fi
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          metadata = json.load(open("release-metadata.json", encoding="utf-8"))
+          for key in ("version", "release_date", "commit_sha", "tag"):
+              output_key = "commit" if key == "commit_sha" else "release_tag" if key == "tag" else key
+              print(f"{output_key}={metadata[key]}")
+          PY
+
+  linux:
+    name: Linux
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'linux'
+    needs: validate
+    uses: ./.github/workflows/linux.yml
+    with:
+      version: ${{ needs.validate.outputs.version }}
+      release_date: ${{ needs.validate.outputs.release_date }}
+      commit: ${{ needs.validate.outputs.commit }}
+      arch: ${{ github.event_name == 'push' && 'all' || inputs.arch }}
+
+  windows:
+    name: Windows
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'windows'
+    needs: validate
+    uses: ./.github/workflows/windows.yml
+    with:
+      version: ${{ needs.validate.outputs.version }}
+      release_date: ${{ needs.validate.outputs.release_date }}
+      commit: ${{ needs.validate.outputs.commit }}
+      arch: ${{ github.event_name == 'push' && 'all' || inputs.arch }}
+
+  macos:
+    name: macOS
+    if: github.event_name == 'push' || inputs.target == 'all' || inputs.target == 'macos'
+    needs: validate
+    uses: ./.github/workflows/macos.yml
+    with:
+      version: ${{ needs.validate.outputs.version }}
+      release_date: ${{ needs.validate.outputs.release_date }}
+      commit: ${{ needs.validate.outputs.commit }}
+
+  publish:
+    name: Publish GitHub release
+    if: github.event_name == 'push'
+    needs: [validate, linux, windows, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Check out source and tags
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Download verified release packages
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: leomoon-subfix-*-release-${{ github.sha }}
+          path: release-input
+
+      - name: Collect individual release assets
+        shell: bash
+        run: |
+          mkdir release-assets
+          find release-input -type f \( -name '*.AppImage' -o -name '*-setup.exe' -o -name '*.dmg' \) -exec cp {} release-assets/ \;
+          test "$(find release-assets -type f | wc -l)" -eq 5
+          (cd release-assets && sha256sum ./* > SHA256SUMS)
+
+      - name: Generate release notes with commit list
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous_tag="$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || true)"
+          commit_range="${previous_tag:+$previous_tag..}$GITHUB_REF_NAME"
+          {
+            echo "Released: ${{ needs.validate.outputs.release_date }}"
+            echo
+            echo "## Commits"
+            while IFS= read -r commit_hash; do
+              subject="$(git show -s --format=%s "$commit_hash")"
+              author_name="$(git show -s --format=%an "$commit_hash")"
+              author_login="$(gh api "repos/$GITHUB_REPOSITORY/commits/$commit_hash" --jq '.author.login // empty' 2>/dev/null || true)"
+              if [[ -n "$author_login" ]]; then
+                printf -- '- %s ([`%s`](https://github.com/%s/commit/%s) by [%s](https://github.com/%s))\n' "$subject" "${commit_hash:0:7}" "$GITHUB_REPOSITORY" "$commit_hash" "$author_name" "$author_login"
+              else
+                printf -- '- %s ([`%s`](https://github.com/%s/commit/%s) by %s)\n' "$subject" "${commit_hash:0:7}" "$GITHUB_REPOSITORY" "$commit_hash" "$author_name"
+              fi
+            done < <(git rev-list "$commit_range")
+            echo
+            echo "## Downloads"
+            echo
+            echo "Windows installers, Linux AppImages, and the macOS DMG are attached below."
+          } > release-notes.md
+
+      - name: Publish release and individual files
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="LeoMoon SubFix $GITHUB_REF_NAME"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "$title" --notes-file release-notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --title "$title" --notes-file release-notes.md
+          fi
+          gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber
