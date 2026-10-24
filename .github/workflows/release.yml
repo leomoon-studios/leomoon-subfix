@@ -112,19 +112,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download verified release packages
+      - name: Download verified Linux artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          pattern: leomoon-subfix-*-release-${{ github.sha }}
-          path: release-input
+          pattern: leomoon-subfix-linux-*-release-${{ github.sha }}
+          path: release-input/linux
+
+      - name: Download verified Windows artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: leomoon-subfix-windows-*-release-${{ github.sha }}
+          path: release-input/windows
+
+      - name: Download verified macOS artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: leomoon-subfix-macos-universal-*-release-${{ github.sha }}
+          path: release-input/macos
 
       - name: Collect individual release assets
         shell: bash
-        run: |
-          mkdir release-assets
-          find release-input -type f \( -name '*.AppImage' -o -name '*-setup.exe' -o -name '*.dmg' \) -exec cp {} release-assets/ \;
-          test "$(find release-assets -type f | wc -l)" -eq 5
-          (cd release-assets && sha256sum ./* > SHA256SUMS)
+        run: scripts/collect-release-assets.sh release-input/linux release-input/windows release-input/macos release-assets
 
       - name: Generate release notes with commit list
         shell: bash

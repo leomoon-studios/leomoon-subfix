@@ -15,6 +15,18 @@ def test_release_dispatches_to_dedicated_platform_workflows() -> None:
     assert "./.github/workflows/macos.yml" in release
     assert "Publish GitHub release" in release
     assert "Generate release notes with commit list" in release
+    assert "collect-release-assets.sh" in release
+
+
+def test_release_asset_collector_requires_each_platform_asset() -> None:
+    collector = (PROJECT_ROOT / "scripts" / "collect-release-assets.sh").read_text(encoding="utf-8")
+
+    assert '"leomoon-subfix-$version-linux-x86_64.AppImage"' in collector
+    assert '"leomoon-subfix-$version-linux-aarch64.AppImage"' in collector
+    assert '"leomoon-subfix-$version-windows-x64-setup.exe"' in collector
+    assert '"leomoon-subfix-$version-windows-arm64-setup.exe"' in collector
+    assert '"leomoon-subfix-$version-macos-universal.dmg"' in collector
+    assert "Expected exactly one release asset" in collector
 
 
 def test_linux_publishes_appimages_not_raw_bundles() -> None:
