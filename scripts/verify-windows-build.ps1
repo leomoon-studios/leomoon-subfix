@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$ApplicationPath
+    [Parameter(Mandatory = $true)][string]$ApplicationPath,
+    [ValidateSet("x64", "arm64")][string]$Architecture = "x64"
 )
 
 $ErrorActionPreference = "Stop"
@@ -10,8 +11,10 @@ if ([System.Text.Encoding]::ASCII.GetString($bytes, 0, 2) -ne "MZ") {
     throw "The application is not a PE executable"
 }
 $peOffset = [System.BitConverter]::ToInt32($bytes, 0x3c)
-if ([System.BitConverter]::ToUInt16($bytes, $peOffset + 4) -ne 0x8664) {
-    throw "The application is not x64"
+$machine = [System.BitConverter]::ToUInt16($bytes, $peOffset + 4)
+$expectedMachine = if ($Architecture -eq "arm64") { 0xAA64 } else { 0x8664 }
+if ($machine -ne $expectedMachine) {
+    throw "The application is not $Architecture"
 }
 
 $dumpbin = Get-Command dumpbin.exe -ErrorAction SilentlyContinue

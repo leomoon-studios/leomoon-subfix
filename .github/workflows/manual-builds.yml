@@ -37,12 +37,23 @@ jobs:
         include:
           - platform: windows-x64
             runner: windows-2022
+            architecture: x64
+            executable: LeoMoon SubFix.exe
+          - platform: windows-arm64
+            runner: windows-11-vs2026-arm
+            architecture: arm64
             executable: LeoMoon SubFix.exe
           - platform: linux-x86_64
             runner: ubuntu-24.04
+            architecture: x64
+            executable: LeoMoon SubFix
+          - platform: linux-aarch64
+            runner: ubuntu-24.04-arm
+            architecture: arm64
             executable: LeoMoon SubFix
           - platform: macos
             runner: macos-15
+            architecture: arm64
             executable: LeoMoon SubFix
 
     steps:
@@ -85,10 +96,11 @@ jobs:
         shell: pwsh
         run: |
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $installationPath = (& $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath).Trim()
+          $component = "${{ matrix.architecture == 'arm64' && 'Microsoft.VisualStudio.Component.VC.Tools.ARM64' || 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64' }}"
+          $installationPath = (& $vswhere -latest -products * -requires $component -property installationPath).Trim()
           if ([string]::IsNullOrWhiteSpace($installationPath)) { throw "Visual Studio C++ tools were not found" }
           $devCommand = Join-Path $installationPath "Common7\Tools\VsDevCmd.bat"
-          & cmd.exe /s /c "`"$devCommand`" -no_logo -arch=x64 -host_arch=x64 && set" |
+          & cmd.exe /s /c "`"$devCommand`" -no_logo -arch=${{ matrix.architecture }} -host_arch=${{ matrix.architecture }} && set" |
             ForEach-Object {
               $separator = $_.IndexOf("=")
               if ($separator -gt 0) {
@@ -125,17 +137,17 @@ jobs:
             --clean
 
       - name: Verify Windows PE dependencies
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.architecture == 'x64'
         shell: pwsh
-        run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-windows-x64\leomoon-subfix\LeoMoon SubFix.exe"
+        run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-${{ matrix.platform }}\leomoon-subfix\LeoMoon SubFix.exe" -Architecture "${{ matrix.architecture }}"
 
       - name: Install Inno Setup
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.architecture == 'x64'
         shell: pwsh
         run: choco install innosetup --yes --no-progress
 
       - name: Package Windows installer
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.architecture == 'x64'
         shell: pwsh
         env:
           BUILD_VERSION: ${{ inputs.version }}
