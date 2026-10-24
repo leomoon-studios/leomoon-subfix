@@ -185,10 +185,14 @@ jobs:
           retention-days: 14
 
   windows-installer-smoke:
-    name: Windows installer smoke test
+    name: Windows installer smoke test (${{ matrix.architecture }})
     needs: build
-    runs-on: windows-2022
+    runs-on: ${{ matrix.architecture == 'arm64' && 'windows-11-vs2026-arm' || 'windows-2022' }}
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, arm64]
     steps:
       - name: Check out verification scripts
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -196,9 +200,9 @@ jobs:
       - name: Download Windows installer
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          name: leomoon-subfix-windows-installer-x64-${{ github.sha }}
+          name: leomoon-subfix-windows-installer-${{ matrix.architecture }}-${{ github.sha }}
           path: dist
 
       - name: Install, upgrade, convert, and uninstall
         shell: pwsh
-        run: '& scripts/smoke-windows-installer.ps1 -ArtifactDirectory "$env:GITHUB_WORKSPACE\dist" -Version "${{ inputs.version }}"'
+        run: '& scripts/smoke-windows-installer.ps1 -ArtifactDirectory "$env:GITHUB_WORKSPACE\dist" -Version "${{ inputs.version }}" -Architecture "${{ matrix.architecture }}"'

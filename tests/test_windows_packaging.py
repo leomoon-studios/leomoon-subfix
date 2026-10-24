@@ -38,3 +38,4 @@ def test_windows_installer_smoke_checks_install_upgrade_conversion_and_uninstall
     assert "legacy-windows-1256.srt" in smoke_script
     assert '"--convert", $fixture' in smoke_script
     assert "unins000.exe" in smoke_script
+    assert 'ValidateSet("x64", "arm64")' in smoke_script

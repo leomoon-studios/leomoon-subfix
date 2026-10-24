@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$ArtifactDirectory,
     [Parameter(Mandatory = $true)][ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version,
-    [ValidateSet("x64")][string]$Architecture = "x64"
+    [ValidateSet("x64", "arm64")][string]$Architecture = "x64"
 )
 
 $ErrorActionPreference = "Stop"
@@ -39,6 +39,12 @@ try {
     Invoke-CheckedProcess $installer $installArguments 600
     $application = Join-Path $installDirectory "LeoMoon SubFix.exe"
     if (-not (Test-Path -LiteralPath $application -PathType Leaf)) { throw "Installed application is missing" }
+    $bytes = [System.IO.File]::ReadAllBytes($application)
+    if ([System.Text.Encoding]::ASCII.GetString($bytes, 0, 2) -ne "MZ") { throw "Installed application is not a PE executable" }
+    $peOffset = [System.BitConverter]::ToInt32($bytes, 0x3c)
+    $machine = [System.BitConverter]::ToUInt16($bytes, $peOffset + 4)
+    $expectedMachine = if ($Architecture -eq "arm64") { 0xAA64 } else { 0x8664 }
+    if ($machine -ne $expectedMachine) { throw "Installed application is not $Architecture" }
     if (Get-ChildItem -LiteralPath $installDirectory -Recurse -File -Include msvcp100.dll,msvcr100.dll,istask.dll) { throw "Installer deployed an obsolete binary" }
 
     $fixture = Join-Path $testRoot "legacy-windows-1256.srt"
