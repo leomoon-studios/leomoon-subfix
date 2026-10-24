@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 $stage = (Resolve-Path -LiteralPath $StageDirectory).Path
 $installer = (Resolve-Path -LiteralPath $InstallerPath).Path
-$application = Join-Path $stage "leomoon-subfix.exe"
+$application = Join-Path $stage "LeoMoon SubFix.exe"
 
 if (-not (Test-Path -LiteralPath $application -PathType Leaf)) {
     throw "Expected application executable was not found: $application"
@@ -39,13 +39,21 @@ $dumpbin = Get-Command dumpbin.exe -ErrorAction SilentlyContinue
 if (-not $dumpbin) {
     throw "dumpbin.exe is required to verify PE dependencies"
 }
-$dependencies = & $dumpbin.Source /DEPENDENTS $application
-if ($LASTEXITCODE -ne 0) {
-    throw "dumpbin /DEPENDENTS failed"
-}
-foreach ($forbidden in @("MSVCP100.DLL", "MSVCR100.DLL")) {
-    if ($dependencies -match [regex]::Escape($forbidden)) {
-        throw "The staged application imports obsolete Visual C++ 2010 runtime $forbidden"
+$peBinaries = Get-ChildItem -LiteralPath $stage -Recurse -File |
+    Where-Object { $_.Extension -in ".exe", ".dll", ".pyd" } |
+    Where-Object {
+        $candidateBytes = [System.IO.File]::ReadAllBytes($_.FullName)
+        $candidateBytes.Length -ge 2 -and [System.Text.Encoding]::ASCII.GetString($candidateBytes, 0, 2) -eq "MZ"
+    }
+foreach ($binary in $peBinaries) {
+    $dependencies = & $dumpbin.Source /DEPENDENTS $binary.FullName
+    if ($LASTEXITCODE -ne 0) {
+        throw "dumpbin /DEPENDENTS failed for $($binary.FullName)"
+    }
+    foreach ($forbidden in @("MSVCP100.DLL", "MSVCR100.DLL")) {
+        if ($dependencies -match [regex]::Escape($forbidden)) {
+            throw "$($binary.FullName) imports obsolete Visual C++ 2010 runtime $forbidden"
+        }
     }
 }
 

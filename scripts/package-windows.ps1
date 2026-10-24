@@ -12,8 +12,8 @@ param(
 $ErrorActionPreference = "Stop"
 $repoDirectory = Split-Path -Parent $PSScriptRoot
 $sourceStage = (Resolve-Path -LiteralPath $StageDirectory).Path
-if (-not (Test-Path -LiteralPath (Join-Path $sourceStage "leomoon-subfix.exe") -PathType Leaf)) {
-    throw "StageDirectory must contain leomoon-subfix.exe"
+if (-not (Test-Path -LiteralPath (Join-Path $sourceStage "LeoMoon SubFix.exe") -PathType Leaf)) {
+    throw "StageDirectory must contain LeoMoon SubFix.exe"
 }
 
 if (-not $IsccPath) {
@@ -69,7 +69,7 @@ $signTool = $null
 if ($certificatePath) {
     if (-not (Test-Path -LiteralPath $certificatePath -PathType Leaf)) { throw "Configured signing certificate does not exist" }
     $signTool = Get-SignTool
-    Sign-Artifact (Join-Path $stage "leomoon-subfix.exe") $signTool
+    Sign-Artifact (Join-Path $stage "LeoMoon SubFix.exe") $signTool
 }
 
 & $IsccPath "/Qp" "/DAppVersion=$Version" "/DStageDir=$stage" "/DOutputDir=$packageDirectory" "/DLicenseFile=$license" $installerScript

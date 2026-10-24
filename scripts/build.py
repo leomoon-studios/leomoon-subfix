@@ -102,7 +102,7 @@ def build(args: argparse.Namespace, output_directory: Path) -> Path:
         env=environment,
     )
     application_directory = output_directory / "leomoon-subfix"
-    executable_name = "leomoon-subfix.exe" if sys.platform == "win32" else "leomoon-subfix"
+    executable_name = "LeoMoon SubFix.exe" if sys.platform == "win32" else "LeoMoon SubFix"
     if not (application_directory / executable_name).is_file():
         raise FileNotFoundError("PyInstaller did not produce the expected application executable.")
     return application_directory

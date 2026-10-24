@@ -97,7 +97,7 @@ VSVersionInfo(
           StringStruct(u'ProductVersion', u'{version}'),
           StringStruct(u'FileVersion', u'{version}'),
           StringStruct(u'InternalName', u'leomoon-subfix'),
-          StringStruct(u'OriginalFilename', u'leomoon-subfix.exe'),
+          StringStruct(u'OriginalFilename', u'LeoMoon SubFix.exe'),
           StringStruct(u'FileDescription', u'LeoMoon SubFix'),
           StringStruct(u'LegalCopyright', u'Copyright 2018 LeoMoon Studios'),
         ]

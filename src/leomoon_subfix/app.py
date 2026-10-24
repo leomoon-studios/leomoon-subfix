@@ -2,6 +2,7 @@
 
 # TODO:
 
+import argparse
 import os
 import sys
 import time #date and time
@@ -158,6 +159,13 @@ class mainUi(QtWidgets.QMainWindow):
         self.close()
 
 def main():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--convert", metavar="SUBTITLE")
+    arguments, _ = parser.parse_known_args()
+    if arguments.convert:
+        print(convert_subtitle(arguments.convert))
+        return
+
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     QtGui.QFontDatabase.addApplicationFont(':/res/fonts/Vazir.ttf') #add custom font to install

@@ -1,5 +1,5 @@
 #define AppName "LeoMoon SubFix"
-#define AppExeName "leomoon-subfix.exe"
+#define AppExeName "LeoMoon SubFix.exe"
 #define AppId "{{D4BDE6DF-C142-42F8-AD47-464F588341A3}"
 
 #ifndef AppVersion

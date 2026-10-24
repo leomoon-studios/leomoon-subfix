@@ -27,3 +27,4 @@ def test_windows_packaging_rejects_legacy_runtime_dlls() -> None:
     assert "THIRD_PARTY_NOTICES.md" in package_script
     assert "release-manifest.json" in package_script
     assert "SHA256SUMS" in package_script
+    assert '".exe", ".dll", ".pyd"' in verifier

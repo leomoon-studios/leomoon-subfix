@@ -7,6 +7,16 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BUILD_SCRIPT = PROJECT_ROOT / "scripts" / "build.py"
+SPECIFICATION = PROJECT_ROOT / "packaging" / "pyinstaller" / "subfix.spec"
+
+
+def test_built_application_uses_the_display_name_and_stable_artifact_slug() -> None:
+    specification = SPECIFICATION.read_text(encoding="utf-8")
+    build_script = BUILD_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'name="LeoMoon SubFix"' in specification
+    assert 'name="leomoon-subfix"' in specification
+    assert 'executable_name = "LeoMoon SubFix.exe"' in build_script
 
 
 def test_build_rejects_an_unsafe_output_directory() -> None:

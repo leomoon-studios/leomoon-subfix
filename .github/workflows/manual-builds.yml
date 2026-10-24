@@ -37,13 +37,13 @@ jobs:
         include:
           - platform: windows-x64
             runner: windows-2022
-            executable: leomoon-subfix.exe
+            executable: LeoMoon SubFix.exe
           - platform: linux-x86_64
             runner: ubuntu-24.04
-            executable: leomoon-subfix
+            executable: LeoMoon SubFix
           - platform: macos
             runner: macos-15
-            executable: leomoon-subfix
+            executable: LeoMoon SubFix
 
     steps:
       - name: Check out source
@@ -127,14 +127,14 @@ jobs:
       - name: Verify Windows PE dependencies
         if: runner.os == 'Windows'
         shell: pwsh
-        run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-windows-x64\leomoon-subfix\leomoon-subfix.exe"
+        run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-windows-x64\leomoon-subfix\LeoMoon SubFix.exe"
 
       - name: Launch packaged application
         shell: bash
         env:
           BUILD_PLATFORM: ${{ matrix.platform }}
           EXECUTABLE: ${{ matrix.executable }}
-        run: "$PYTHON_BIN scripts/smoke_bundle.py build/manual-$BUILD_PLATFORM/leomoon-subfix/$EXECUTABLE"
+        run: "$PYTHON_BIN" scripts/smoke_bundle.py "build/manual-$BUILD_PLATFORM/leomoon-subfix/$EXECUTABLE"
 
       - name: Upload build diagnostics and artifacts
         if: always()
