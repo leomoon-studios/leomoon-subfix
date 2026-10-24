@@ -11,6 +11,7 @@ dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 os.environ["PATH"] += os.pathsep + dllpath
 os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
 import time #date and time
+from converter import convert_subtitle
 from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
 from PyQt5 import QtWidgets, QtCore, QtGui #pyqt stuff
 #local imports
@@ -151,21 +152,13 @@ class mainUi(QtWidgets.QMainWindow):
             # self.ui.actionDarkMode.setChecked(False)
         self.themeFlg = not self.themeFlg
 
-    def _convert(self, cfile, fencoding='windows-1256', tencoding='UTF-8'):
-        cdir = os.path.dirname(cfile)
-        cname = os.path.splitext(os.path.basename(cfile))[0]
-        cext = os.path.splitext(os.path.basename(cfile))[1]
-        nfile = cdir+'/'+cname+'_fixed'+cext
-        with open(cfile, 'r', encoding=fencoding) as fr:
-            try:
-                with open(nfile, 'w', encoding=tencoding) as fw:
-                    for line in fr:
-                        if self.ui.fixCbox.isChecked():
-                            line = line.replace('ي','ی').replace('ك','ک')
-                        fw.write(line[:-1]+'\n')
-                self.ui.statusLbl.setText('<span style="color:#228B22;">All done ['+time.strftime('%H:%M:%S')+']'+'</span>')
-            except ValueError as e:
-                self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Encoding not supported ['+time.strftime('%H:%M:%S')+']'+'</span>')
+    def _convert(self, cfile):
+        try:
+            convert_subtitle(cfile, normalize_persian=self.ui.fixCbox.isChecked())
+        except (OSError, UnicodeError, ValueError):
+            self.ui.statusLbl.setText('<span style="color:#CD5C5C;">Encoding not supported ['+time.strftime('%H:%M:%S')+']'+'</span>')
+        else:
+            self.ui.statusLbl.setText('<span style="color:#228B22;">All done ['+time.strftime('%H:%M:%S')+']'+'</span>')
 
     def _exit(self):
         self.close()
