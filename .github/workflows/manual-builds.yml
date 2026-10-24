@@ -1,0 +1,139 @@
+name: Manual platform builds
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version in MAJOR.MINOR.PATCH form
+        required: true
+        default: "2.1.0"
+        type: string
+      release_date:
+        description: UTC ISO 8601 release date
+        required: true
+        default: "2026-10-24T00:00:00Z"
+        type: string
+      commit_sha:
+        description: Commit SHA recorded in the build manifest, blank uses the dispatched commit
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manual-platform-builds-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: ${{ matrix.platform }} smoke build
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-x64
+            runner: windows-2022
+            executable: leomoon-subfix.exe
+          - platform: linux-x86_64
+            runner: ubuntu-24.04
+            executable: leomoon-subfix
+          - platform: macos
+            runner: macos-15
+            executable: leomoon-subfix
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Create locked project environment
+        shell: bash
+        run: |
+          python -m venv .venv
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            python_bin=.venv/Scripts/python.exe
+            uv_bin=.venv/Scripts/uv.exe
+          else
+            python_bin=.venv/bin/python
+            uv_bin=.venv/bin/uv
+          fi
+          "$python_bin" -m pip install "uv==0.13.5"
+          "$uv_bin" sync --all-extras --locked
+          echo "PYTHON_BIN=$python_bin" >> "$GITHUB_ENV"
+
+      - name: Configure MSVC dependency tools
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installationPath = (& $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath).Trim()
+          if ([string]::IsNullOrWhiteSpace($installationPath)) { throw "Visual Studio C++ tools were not found" }
+          $devCommand = Join-Path $installationPath "Common7\Tools\VsDevCmd.bat"
+          & cmd.exe /s /c "`"$devCommand`" -no_logo -arch=x64 -host_arch=x64 && set" |
+            ForEach-Object {
+              $separator = $_.IndexOf("=")
+              if ($separator -gt 0) {
+                $name = $_.Substring(0, $separator)
+                $value = $_.Substring($separator + 1)
+                if ($name -notmatch '^(GITHUB_|RUNNER_|ACTIONS_)') {
+                  "$name=$value" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+                }
+              }
+            }
+
+      - name: Regenerate Qt and test
+        shell: bash
+        run: |
+          "$PYTHON_BIN" scripts/generate_qt.py
+          git diff --exit-code
+          "$PYTHON_BIN" -m ruff check src tests scripts
+          QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion "$PYTHON_BIN" -m pytest -q -rs
+          "$PYTHON_BIN" -m pip check
+
+      - name: Build one-directory application
+        shell: bash
+        env:
+          BUILD_VERSION: ${{ inputs.version }}
+          BUILD_DATE: ${{ inputs.release_date }}
+          BUILD_COMMIT: ${{ inputs.commit_sha || github.sha }}
+          BUILD_PLATFORM: ${{ matrix.platform }}
+        run: |
+          "$PYTHON_BIN" scripts/build.py \
+            --version "$BUILD_VERSION" \
+            --release-date "$BUILD_DATE" \
+            --commit "$BUILD_COMMIT" \
+            --output-dir "build/manual-$BUILD_PLATFORM" \
+            --clean
+
+      - name: Verify Windows PE dependencies
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-windows-x64\leomoon-subfix\leomoon-subfix.exe"
+
+      - name: Launch packaged application
+        shell: bash
+        env:
+          BUILD_PLATFORM: ${{ matrix.platform }}
+          EXECUTABLE: ${{ matrix.executable }}
+        run: "$PYTHON_BIN scripts/smoke_bundle.py build/manual-$BUILD_PLATFORM/leomoon-subfix/$EXECUTABLE"
+
+      - name: Upload build diagnostics and artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-subfix-${{ matrix.platform }}-${{ github.sha }}
+          path: |
+            build/manual-${{ matrix.platform }}/leomoon-subfix/
+            build/manual-${{ matrix.platform }}/release-manifest.json
+            build/manual-${{ matrix.platform }}/.work/pyinstaller/subfix/warn-subfix.txt
+            build/manual-${{ matrix.platform }}/.work/pyinstaller/subfix/xref-subfix.html
+          if-no-files-found: warn
+          retention-days: 14
