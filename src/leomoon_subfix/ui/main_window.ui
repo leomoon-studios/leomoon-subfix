@@ -215,7 +215,7 @@ QLabel#verLbl {color: rgb(68,68,68);}</string>
              </font>
             </property>
             <property name="text">
-             <string>1.0.0</string>
+             <string/>
             </property>
            </widget>
           </item>

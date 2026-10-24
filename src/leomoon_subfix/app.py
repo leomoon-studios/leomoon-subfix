@@ -1,7 +1,5 @@
 #-*- coding: utf-8 -*-
 
-#version: 2.0.7
-
 # TODO:
 
 import os
@@ -12,9 +10,9 @@ from darkdetect import isDark
 from PySide6 import QtWidgets, QtCore, QtGui #qt stuff
 #local imports
 from ._generated.main_window import Ui_main
+from .version import __version__
 
 title = 'LeoMoon SubFix'
-ver = '1.0.0'
 
 class mainUi(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -28,7 +26,7 @@ class mainUi(QtWidgets.QMainWindow):
         self.setWindowFlags(QtCore.Qt.WindowType.Window | QtCore.Qt.WindowType.MSWindowsFixedSizeDialogHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
         self.setWindowTitle(title)
         self.ui.titleLbl.setText(title)
-        self.ui.verLbl.setText('v'+ver)
+        self.ui.verLbl.setText(f'v{__version__}')
         self.ui.dropLbl.setStyleSheet("QLabel {color:grey;}")
         self.ui.titleLbl.setFont(QtGui.QFont('Vazir', 15, QtGui.QFont.Weight.Black))
         self.ui.dropLbl.setFont(QtGui.QFont('Vazir', 30, QtGui.QFont.Weight.Black))

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=84.2.1,<85"]
+requires = ["setuptools>=84.2.1,<85", "setuptools-scm[simple]>=10.3.4,<11"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "leomoon-subfix"
-version = "1.0.0"
+dynamic = ["version"]
 description = "Convert Windows-1256 subtitle files to UTF-8."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -44,6 +44,10 @@ include = ["leomoon_subfix*"]
 
 [tool.setuptools.package-data]
 leomoon_subfix = ["assets/fonts/*.ttf", "assets/icons/*", "ui/*.qrc", "ui/*.ui"]
+
+[tool.setuptools_scm]
+version_file = "src/leomoon_subfix/_version.py"
+fallback_version = "0.0.0+unknown"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

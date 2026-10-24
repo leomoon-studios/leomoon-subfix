@@ -29,6 +29,7 @@ def test_uses_declared_darkdetect_dependency() -> None:
 
 def test_main_window_displays_version_and_converts_file(qapp, monkeypatch, tmp_path: Path) -> None:
     from leomoon_subfix import app
+    from leomoon_subfix.version import __version__
 
     monkeypatch.setattr(app, "isDark", lambda: False)
     source = tmp_path / "window.srt"
@@ -38,7 +39,7 @@ def test_main_window_displays_version_and_converts_file(qapp, monkeypatch, tmp_p
 
     window._convert(str(source))
 
-    assert window.ui.verLbl.text() == "v1.0.0"
+    assert window.ui.verLbl.text() == f"v{__version__}"
     assert (tmp_path / "window_fixed.srt").read_text(encoding="utf-8") == "ی ک\n"
     assert "All done" in window.ui.statusLbl.text()
     assert not window.windowIcon().isNull()

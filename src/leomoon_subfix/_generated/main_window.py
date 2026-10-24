@@ -185,7 +185,7 @@ class Ui_main(object):
         main.setWindowTitle(QCoreApplication.translate("main", u"MainWindow", None))
         self.logoLbl.setText("")
         self.titleLbl.setText(QCoreApplication.translate("main", u"Title", None))
-        self.verLbl.setText(QCoreApplication.translate("main", u"1.0.0", None))
+        self.verLbl.setText("")
         self.dropLbl.setText(QCoreApplication.translate("main", u"Drop SRT f\u200cile here", None))
         self.fixCbox.setText(QCoreApplication.translate("main", u"Replace \u00ab\u064a\u00bb with \u00ab\u06cc\u00bb and \u00ab\u0643\u00bb with \u00ab\u06a9\u00bb", None))
         self.statusLbl.setText(QCoreApplication.translate("main", u"Ready.", None))

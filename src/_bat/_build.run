@@ -1,5 +1,5 @@
 AppName='LeoMoon SubFix'
-BuildVer='1.0.0'
+BuildVer="${BuildVer:?Set BuildVer from scripts/prepare_release_metadata.py before running this legacy script.}"
 # cleanup old build if any
 rm -rf "`pwd`/__pycache__"
 rm -rf "`pwd`/build"

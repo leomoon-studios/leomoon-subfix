@@ -1,6 +1,8 @@
 #define AppName "LeoMoon SubFix"
 #define AppShortName "SubFix"
-#define AppVersion "1.0.0"
+#ifndef AppVersion
+  #error AppVersion must be passed on the Inno Setup command line.
+#endif
 #define AppExeName "LeoMoon SubFix.exe"
 #define CompanyName "LeoMoon Studios"
 #define AppWebsiteName "LeoMoon Studios Homepage"
