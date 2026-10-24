@@ -86,6 +86,7 @@ jobs:
       release_date: ${{ needs.validate.outputs.release_date }}
       commit: ${{ needs.validate.outputs.commit }}
       arch: ${{ github.event_name == 'push' && 'all' || inputs.arch }}
+    secrets: inherit
 
   macos:
     name: macOS

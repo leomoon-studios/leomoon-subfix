@@ -7,6 +7,9 @@ on:
       release_date: { required: true, type: string }
       commit: { required: true, type: string }
       arch: { required: false, default: all, type: string }
+    secrets:
+      WINDOWS_SIGNING_CERTIFICATE_BASE64: { required: false }
+      WINDOWS_SIGNING_CERTIFICATE_PASSWORD: { required: false }
 
 permissions:
   contents: read
@@ -80,9 +83,31 @@ jobs:
         shell: pwsh
         run: choco install innosetup --yes --no-progress
 
+      - name: Prepare optional signing certificate
+        shell: pwsh
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:CERTIFICATE_BASE64)) {
+            Write-Host "No protected Windows signing certificate is configured; producing an unsigned installer."
+            exit 0
+          }
+          $certificatePath = Join-Path $env:RUNNER_TEMP "leomoon-subfix-signing.pfx"
+          [System.IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:CERTIFICATE_BASE64))
+          "SUBFIX_WINDOWS_CERTIFICATE_PATH=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "SUBFIX_WINDOWS_CERTIFICATE_PASSWORD=$env:CERTIFICATE_PASSWORD" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Package and verify Windows installer
         shell: pwsh
+        env:
+          SUBFIX_WINDOWS_TIMESTAMP_URL: http://timestamp.digicert.com
         run: '& scripts/package-windows.ps1 -StageDirectory "build\windows-${{ matrix.release_arch }}\leomoon-subfix" -DistDirectory "dist" -Version "${{ inputs.version }}" -ReleaseDate "${{ inputs.release_date }}" -Commit "${{ inputs.commit }}" -Architecture "${{ matrix.release_arch }}"'
+
+      - name: Remove temporary signing certificate
+        if: always()
+        shell: pwsh
+        run: Remove-Item -LiteralPath "$env:RUNNER_TEMP\leomoon-subfix-signing.pfx" -Force -ErrorAction SilentlyContinue
 
       - name: Retain raw bundle diagnostics on failure
         if: failure()
