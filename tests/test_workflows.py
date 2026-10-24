@@ -32,4 +32,6 @@ def test_macos_workflow_packages_a_dmg() -> None:
 
     assert "package-macos.sh" in macos
     assert "hdiutil create" in package_script
-    assert "macos-arm64.dmg" in package_script
+    assert '"$architecture" == universal' in package_script
+    assert "macos-$architecture.dmg" in package_script
+    assert "merge-macos-universal.sh" in macos

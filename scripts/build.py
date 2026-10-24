@@ -19,6 +19,7 @@ VERSION_PATTERN = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BUILD_ROOT = PROJECT_ROOT / "build"
 SPECIFICATION = PROJECT_ROOT / "packaging" / "pyinstaller" / "subfix.spec"
+MACOS_INFO_TEMPLATE = PROJECT_ROOT / "packaging" / "macos" / "Info.plist.in"
 
 
 def arguments() -> argparse.Namespace:
@@ -63,6 +64,11 @@ def write_runtime_hook(path: Path, version: str) -> None:
     )
 
 
+def write_macos_info_plist(path: Path, version: str) -> None:
+    template = MACOS_INFO_TEMPLATE.read_text(encoding="utf-8")
+    path.write_text(template.replace("@VERSION@", version), encoding="utf-8")
+
+
 def installed_versions() -> tuple[str, str, str]:
     from PySide6 import QtCore, __version__ as pyside6_version
     from PyInstaller import __version__ as pyinstaller_version
@@ -84,6 +90,10 @@ def build(args: argparse.Namespace, output_directory: Path) -> Path:
     environment = os.environ.copy()
     environment["LEOMOON_SUBFIX_VERSION"] = args.version
     environment["LEOMOON_SUBFIX_RUNTIME_HOOK"] = str(runtime_hook)
+    if sys.platform == "darwin":
+        info_plist = work_directory / "Info.plist"
+        write_macos_info_plist(info_plist, args.version)
+        environment["LEOMOON_SUBFIX_MACOS_INFO_PLIST"] = str(info_plist)
     subprocess.run(
         [
             sys.executable,

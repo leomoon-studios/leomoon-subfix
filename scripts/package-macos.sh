@@ -7,9 +7,10 @@ dist_dir=""
 version=""
 release_date=""
 commit=""
+architecture=""
 
 usage() {
-    echo "Usage: $0 --stage-dir DIR --dist-dir DIR --version VERSION --release-date DATE --commit SHA" >&2
+    echo "Usage: $0 --stage-dir DIR --dist-dir DIR --version VERSION --release-date DATE --commit SHA --architecture universal" >&2
 }
 
 while (( $# )); do
@@ -19,14 +20,16 @@ while (( $# )); do
         --version) version="$2"; shift 2 ;;
         --release-date) release_date="$2"; shift 2 ;;
         --commit) commit="$2"; shift 2 ;;
+        --architecture) architecture="$2"; shift 2 ;;
         *) usage; exit 2 ;;
     esac
 done
 
-[[ -n "$stage_dir" && -n "$dist_dir" && -n "$version" && -n "$release_date" && -n "$commit" ]] || { usage; exit 2; }
+[[ -n "$stage_dir" && -n "$dist_dir" && -n "$version" && -n "$release_date" && -n "$commit" && -n "$architecture" ]] || { usage; exit 2; }
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Version must be MAJOR.MINOR.PATCH" >&2; exit 2; }
 [[ "$release_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T ]] || { echo "Release date must be ISO 8601" >&2; exit 2; }
 [[ "$commit" =~ ^[0-9a-fA-F]{7,64}$ ]] || { echo "Commit must be a Git SHA" >&2; exit 2; }
+[[ "$architecture" == universal ]] || { echo "Architecture must be universal" >&2; exit 2; }
 
 stage_dir="$(realpath "$stage_dir")"
 dist_parent="$(cd "$(dirname "$dist_dir")" && pwd -P)"
@@ -36,6 +39,13 @@ app="$stage_dir/LeoMoon SubFix.app"
 [[ -x "$app/Contents/MacOS/LeoMoon SubFix" ]] || { echo "Application bundle is missing its executable" >&2; exit 1; }
 [[ "$dist_dir" != / && "$dist_dir" != "$repo_dir" ]] || { echo "Refusing to replace unsafe artifact directory: $dist_dir" >&2; exit 1; }
 
+if [[ -n "${SUBFIX_MACOS_CODESIGN_IDENTITY:-}" ]]; then
+    while IFS= read -r -d '' binary; do
+        codesign --force --options runtime --timestamp --sign "$SUBFIX_MACOS_CODESIGN_IDENTITY" "$binary"
+    done < <(find "$app/Contents" -type f -print0 | while IFS= read -r -d '' candidate; do file "$candidate" | grep -q 'Mach-O' && printf '%s\0' "$candidate"; done)
+    codesign --force --options runtime --timestamp --sign "$SUBFIX_MACOS_CODESIGN_IDENTITY" "$app"
+fi
+
 package_dir="$repo_dir/build/package/macos"
 dmg_root="$package_dir/dmg-root"
 rm -rf "$package_dir" "$dist_dir"
@@ -44,10 +54,16 @@ cp -a "$app" "$dmg_root/"
 install -m 0644 "$repo_dir/LICENSE" "$dmg_root/LICENSE.txt"
 install -m 0644 "$repo_dir/THIRD_PARTY_NOTICES.md" "$dmg_root/THIRD_PARTY_NOTICES.md"
 
-dmg="$dist_dir/leomoon-subfix-$version-macos-arm64.dmg"
+dmg="$dist_dir/leomoon-subfix-$version-macos-$architecture.dmg"
 # Use the normal Finder layout and icon. No custom installer artwork is required.
 hdiutil create -quiet -volname "LeoMoon SubFix" -srcfolder "$dmg_root" -ov -format UDZO "$dmg"
-bash "$repo_dir/scripts/verify-macos-dmg.sh" "$dmg" "$version"
+if [[ -n "${SUBFIX_MACOS_NOTARY_PROFILE:-}" ]]; then
+    notary_args=(notarytool submit "$dmg" --keychain-profile "$SUBFIX_MACOS_NOTARY_PROFILE" --wait)
+    if [[ -n "${SUBFIX_MACOS_NOTARY_KEYCHAIN:-}" ]]; then notary_args+=(--keychain "$SUBFIX_MACOS_NOTARY_KEYCHAIN"); fi
+    xcrun "${notary_args[@]}"
+    xcrun stapler staple "$dmg"
+fi
+bash "$repo_dir/scripts/verify-macos-package.sh" "$app" "$dmg" "$version" "$architecture"
 
 cat > "$dist_dir/release-manifest.json" <<EOF
 {
@@ -56,8 +72,10 @@ cat > "$dist_dir/release-manifest.json" <<EOF
   "release_date": "$release_date",
   "commit": "$commit",
   "platform": "macos",
-  "architectures": "arm64",
-  "artifact_format": "DMG"
+  "architectures": "$architecture",
+  "artifact_format": "DMG",
+  "signed": $([ -n "${SUBFIX_MACOS_CODESIGN_IDENTITY:-}" ] && printf true || printf false),
+  "notarized": $([ -n "${SUBFIX_MACOS_NOTARY_PROFILE:-}" ] && printf true || printf false)
 }
 EOF
 (

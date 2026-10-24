@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import plistlib
 import sys
 from pathlib import Path
 
@@ -102,9 +103,12 @@ coll = COLLECT(
 )
 
 if sys.platform == "darwin":
+    with open(os.environ["LEOMOON_SUBFIX_MACOS_INFO_PLIST"], "rb") as info_plist_file:
+        MACOS_INFO_PLIST = plistlib.load(info_plist_file)
     app = BUNDLE(
         coll,
         name="LeoMoon SubFix.app",
         icon=str(APPLICATION_ICON),
         bundle_identifier="com.leomoon.SubFix",
+        info_plist=MACOS_INFO_PLIST,
     )

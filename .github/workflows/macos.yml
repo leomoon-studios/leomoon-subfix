@@ -6,6 +6,13 @@ on:
       version: { required: true, type: string }
       release_date: { required: true, type: string }
       commit: { required: true, type: string }
+    secrets:
+      MACOS_SIGNING_CERTIFICATE_BASE64: { required: false }
+      MACOS_SIGNING_CERTIFICATE_PASSWORD: { required: false }
+      MACOS_APPLICATION_SIGNING_IDENTITY: { required: false }
+      MACOS_NOTARY_APPLE_ID: { required: false }
+      MACOS_NOTARY_TEAM_ID: { required: false }
+      MACOS_NOTARY_APP_PASSWORD: { required: false }
 
 permissions:
   contents: read
@@ -15,54 +22,85 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-test-package:
-    name: Build, test, and package (arm64)
-    runs-on: macos-15
-    timeout-minutes: 45
+  build-native-bundle:
+    name: Build and test native bundle (${{ matrix.architecture }})
+    runs-on: ${{ matrix.architecture == 'arm64' && 'macos-15' || 'macos-15-intel' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x86_64, arm64]
     steps:
-      - name: Check out source
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-
-      - name: Set up Python
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with: { python-version: "3.12" }
-
-      - name: Create locked project environment
-        shell: bash
-        run: |
+      - run: |
           python -m venv .venv
           .venv/bin/python -m pip install "uv==0.13.5"
           .venv/bin/uv sync --all-extras --locked
-
-      - name: Regenerate Qt and test
-        shell: bash
-        run: |
           .venv/bin/python scripts/generate_qt.py
           git diff --exit-code -- src/leomoon_subfix/_generated/main_window.py
           .venv/bin/python -m ruff check src tests scripts
           QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME='' QT_STYLE_OVERRIDE=Fusion .venv/bin/python -m pytest -q -rs
-          .venv/bin/python -m pip check
+          .venv/bin/python scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir build/macos-${{ matrix.architecture }} --clean
+          .venv/bin/python scripts/smoke_bundle.py "build/macos-${{ matrix.architecture }}/leomoon-subfix/LeoMoon SubFix.app/Contents/MacOS/LeoMoon SubFix"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: leomoon-subfix-macos-${{ matrix.architecture }}-bundle-${{ github.sha }}
+          path: build/macos-${{ matrix.architecture }}/leomoon-subfix/LeoMoon SubFix.app/
+          if-no-files-found: error
+          retention-days: 1
 
-      - name: Build, package, and verify DMG
-        shell: bash
+  package-universal-dmg:
+    name: Merge, package, and verify universal DMG
+    needs: build-native-bundle
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: leomoon-subfix-macos-x86_64-bundle-${{ github.sha }}
+          path: bundles/x86_64/LeoMoon SubFix.app
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: leomoon-subfix-macos-arm64-bundle-${{ github.sha }}
+          path: bundles/arm64/LeoMoon SubFix.app
+      - run: bash scripts/merge-macos-universal.sh "bundles/x86_64/LeoMoon SubFix.app" "bundles/arm64/LeoMoon SubFix.app" build/macos-universal/leomoon-subfix
+      - name: Prepare optional signing and notarization
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.MACOS_SIGNING_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_SIGNING_CERTIFICATE_PASSWORD }}
+          APPLICATION_IDENTITY: ${{ secrets.MACOS_APPLICATION_SIGNING_IDENTITY }}
+          NOTARY_APPLE_ID: ${{ secrets.MACOS_NOTARY_APPLE_ID }}
+          NOTARY_TEAM_ID: ${{ secrets.MACOS_NOTARY_TEAM_ID }}
+          NOTARY_PASSWORD: ${{ secrets.MACOS_NOTARY_APP_PASSWORD }}
         run: |
-          .venv/bin/python scripts/build.py --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --output-dir build/macos-arm64 --clean
-          .venv/bin/python scripts/smoke_bundle.py "build/macos-arm64/leomoon-subfix/LeoMoon SubFix.app/Contents/MacOS/LeoMoon SubFix"
-          bash scripts/package-macos.sh --stage-dir build/macos-arm64/leomoon-subfix --dist-dir dist --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}"
-
-      - name: Retain raw bundle diagnostics on failure
-        if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+          if [[ -z "$CERTIFICATE_BASE64" ]]; then echo "Unsigned universal DMG: signing certificate is not configured."; exit 0; fi
+          certificate="$RUNNER_TEMP/leomoon-subfix-signing.p12"; keychain="$RUNNER_TEMP/leomoon-subfix-signing.keychain-db"; keychain_password="$(uuidgen)"
+          printf '%s' "$CERTIFICATE_BASE64" | base64 --decode > "$certificate"
+          security create-keychain -p "$keychain_password" "$keychain"; security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$certificate" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain"; security list-keychains -d user -s "$keychain"
+          echo "SUBFIX_MACOS_CODESIGN_IDENTITY=$APPLICATION_IDENTITY" >> "$GITHUB_ENV"; echo "SUBFIX_MACOS_SIGNING_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          if [[ -n "$NOTARY_APPLE_ID" && -n "$NOTARY_TEAM_ID" && -n "$NOTARY_PASSWORD" ]]; then xcrun notarytool store-credentials leomoon-subfix-notary --apple-id "$NOTARY_APPLE_ID" --team-id "$NOTARY_TEAM_ID" --password "$NOTARY_PASSWORD" --keychain "$keychain"; echo "SUBFIX_MACOS_NOTARY_PROFILE=leomoon-subfix-notary" >> "$GITHUB_ENV"; echo "SUBFIX_MACOS_NOTARY_KEYCHAIN=$keychain" >> "$GITHUB_ENV"; fi
+      - run: bash scripts/package-macos.sh --stage-dir build/macos-universal/leomoon-subfix --dist-dir dist --version "${{ inputs.version }}" --release-date "${{ inputs.release_date }}" --commit "${{ inputs.commit }}" --architecture universal
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: macos-arm64-failure-diagnostics
-          path: build/macos-arm64/
-          if-no-files-found: ignore
-          retention-days: 14
-
-      - name: Upload macOS release artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: leomoon-subfix-macos-release-${{ github.sha }}
+          name: leomoon-subfix-macos-universal-release-${{ github.sha }}
           path: dist/
           if-no-files-found: error
           retention-days: 14
+      - if: always()
+        run: |
+          [[ -z "${SUBFIX_MACOS_SIGNING_KEYCHAIN:-}" ]] || security delete-keychain "$SUBFIX_MACOS_SIGNING_KEYCHAIN" || true
+          rm -f "$RUNNER_TEMP/leomoon-subfix-signing.p12"
+
+  clean-dmg-smoke:
+    needs: package-universal-dmg
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: leomoon-subfix-macos-universal-release-${{ github.sha }}
+          path: dist
+      - run: bash scripts/smoke-macos-dmg.sh dist "${{ inputs.version }}" universal

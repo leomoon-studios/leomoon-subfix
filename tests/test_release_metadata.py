@@ -36,7 +36,7 @@ def test_release_metadata_uses_a_semantic_tag(tmp_path: Path) -> None:
     assert metadata == {
         "commit_sha": "a" * 40,
         "linux_appimage_filename": "leomoon-subfix-2.1.0-linux-x86_64.AppImage",
-        "macos_dmg_filename": "leomoon-subfix-2.1.0-macos-arm64.dmg",
+        "macos_dmg_filename": "leomoon-subfix-2.1.0-macos-universal.dmg",
         "release_date": "2026-10-23T12:00:00Z",
         "release_manifest_filename": "leomoon-subfix-2.1.0-manifest.json",
         "tag": "v2.1.0",
