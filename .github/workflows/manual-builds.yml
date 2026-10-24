@@ -179,7 +179,7 @@ jobs:
           BUILD_DATE: ${{ inputs.release_date }}
           BUILD_COMMIT: ${{ inputs.commit_sha || github.sha }}
         run: |
-          scripts/package-linux.sh \
+          bash scripts/package-linux.sh \
             --stage-dir "build/manual-${{ matrix.platform }}/leomoon-subfix" \
             --dist-dir "dist/manual-linux-$APPIMAGE_ARCH" \
             --version "$BUILD_VERSION" \
@@ -194,7 +194,7 @@ jobs:
       - name: Launch Linux AppImage
         if: runner.os == 'Linux'
         shell: bash
-        run: scripts/smoke-linux-appimage.sh "dist/manual-linux-$APPIMAGE_ARCH/leomoon-subfix-${{ inputs.version }}-linux-$APPIMAGE_ARCH.AppImage"
+        run: bash scripts/smoke-linux-appimage.sh "dist/manual-linux-$APPIMAGE_ARCH/leomoon-subfix-${{ inputs.version }}-linux-$APPIMAGE_ARCH.AppImage"
 
       - name: Install Inno Setup
         if: runner.os == 'Windows'
