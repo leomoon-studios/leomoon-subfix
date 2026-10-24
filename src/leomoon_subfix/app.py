@@ -6,16 +6,12 @@
 
 import os
 import sys
-#load dlls
-dllpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-os.environ["PATH"] += os.pathsep + dllpath
-os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = dllpath
 import time #date and time
-from converter import convert_subtitle
-from ext.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
+from .converter import convert_subtitle
+from ._vendor.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
 from PySide6 import QtWidgets, QtCore, QtGui #qt stuff
 #local imports
-from gui.guiMain import Ui_main
+from .ui.main_window import Ui_main
 
 title = 'LeoMoon SubFix'
 ver = '1.0.0'

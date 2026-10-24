@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="res">
+    <file alias="icons/drag-drop.svg">../assets/icons/drag-drop.svg</file>
+    <file alias="icons/main.png">../assets/icons/main.png</file>
+    <file alias="fonts/Vazir.ttf">../assets/fonts/Vazir.ttf</file>
+    <file alias="fonts/Vazir-Black.ttf">../assets/fonts/Vazir-Black.ttf</file>
+    <file alias="fonts/Vazir-FD.ttf">../assets/fonts/Vazir-FD.ttf</file>
+  </qresource>
+</RCC>

@@ -21,12 +21,12 @@ def qapp():
 
 
 def test_main_window_displays_version_and_converts_file(qapp, monkeypatch, tmp_path: Path) -> None:
-    import main
+    from leomoon_subfix import app
 
-    monkeypatch.setattr(main, "isDark", lambda: False)
+    monkeypatch.setattr(app, "isDark", lambda: False)
     source = tmp_path / "window.srt"
     source.write_bytes("ي ك\n".encode("windows-1256"))
-    window = main.mainUi()
+    window = app.mainUi()
     window.ui.fixCbox.setChecked(True)
 
     window._convert(str(source))
@@ -40,19 +40,19 @@ def test_main_window_displays_version_and_converts_file(qapp, monkeypatch, tmp_p
 
 
 def test_main_window_applies_dark_theme(qapp, monkeypatch) -> None:
-    import main
+    from leomoon_subfix import app
 
-    monkeypatch.setattr(main, "isDark", lambda: True)
-    window = main.mainUi()
+    monkeypatch.setattr(app, "isDark", lambda: True)
+    window = app.mainUi()
 
     assert QtGui.QGuiApplication.palette().color(QtGui.QPalette.ColorRole.Window) == QtGui.QColor(55, 53, 53)
     window.close()
 
 
 def test_drop_event_converts_a_subtitle(qapp, monkeypatch, tmp_path: Path) -> None:
-    import main
+    from leomoon_subfix import app
 
-    monkeypatch.setattr(main, "isDark", lambda: False)
+    monkeypatch.setattr(app, "isDark", lambda: False)
     source = tmp_path / "dropped.srt"
     source.write_bytes("ي ك\n".encode("windows-1256"))
     mime_data = QtCore.QMimeData()
@@ -64,7 +64,7 @@ def test_drop_event_converts_a_subtitle(qapp, monkeypatch, tmp_path: Path) -> No
         QtCore.Qt.MouseButton.LeftButton,
         QtCore.Qt.KeyboardModifier.NoModifier,
     )
-    window = main.mainUi()
+    window = app.mainUi()
     window.ui.fixCbox.setChecked(True)
 
     window.dropEvent(event)

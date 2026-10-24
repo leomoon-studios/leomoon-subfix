@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from converter import convert_subtitle, convert_subtitles, fixed_output_path
+from leomoon_subfix.converter import convert_subtitle, convert_subtitles, fixed_output_path
 
 
 FIXTURES_DIRECTORY = Path(__file__).parent / "fixtures"

@@ -1,4 +1,4 @@
-"""Test configuration for the legacy source layout."""
+"""Test configuration for the source-package layout."""
 
 from __future__ import annotations
 

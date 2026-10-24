@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leomoon-subfix"
+version = "1.0.0"
+description = "Convert Windows-1256 subtitle files to UTF-8."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [{ name = "LeoMoon Studios" }]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = ["PySide6>=6.12,<7"]
+
+[project.gui-scripts]
+leomoon-subfix = "leomoon_subfix.app:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["leomoon_subfix*"]
+
+[tool.setuptools.package-data]
+leomoon_subfix = ["assets/fonts/*.ttf", "assets/icons/*", "ui/*.qrc", "ui/*.ui"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
