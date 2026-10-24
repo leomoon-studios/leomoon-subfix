@@ -1,7 +1,0 @@
-Package: leomoon-subfix
-Version: ${VERSION}
-Architecture: i386
-Maintainer: LeoMoon Studios <apps@leomoon.com>
-Essential: no
-Priority: optional
-Description: LeoMoon SubFix
