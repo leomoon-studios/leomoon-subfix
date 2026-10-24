@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=84.2.1,<85"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -21,13 +21,15 @@ dependencies = [
 
 [project.optional-dependencies]
 build = [
-    "PyInstaller>=6,<7",
-    "uv>=0.5,<1",
+    "PyInstaller>=6.22.3,<7",
+    "setuptools-scm>=10.3.4,<11",
+    "uv>=0.13.5,<1",
 ]
 test = [
-    "pytest>=9,<10",
+    "pip-audit>=2.10,<3",
+    "pytest>=9.1.1,<10",
     "pytest-qt>=4.5,<5",
-    "ruff>=0.8,<1",
+    "ruff>=0.17.2,<1",
 ]
 
 [project.gui-scripts]
