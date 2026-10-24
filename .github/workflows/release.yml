@@ -97,7 +97,6 @@ jobs:
       release_date: ${{ needs.validate.outputs.release_date }}
       commit: ${{ needs.validate.outputs.commit }}
     secrets: inherit
-    secrets: inherit
 
   publish:
     name: Publish GitHub release
