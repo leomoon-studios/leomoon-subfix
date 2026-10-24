@@ -5,7 +5,7 @@ param(
     [Parameter(Mandatory = $true)][ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version,
     [Parameter(Mandatory = $true)][ValidatePattern('^\d{4}-\d{2}-\d{2}T')][string]$ReleaseDate,
     [Parameter(Mandatory = $true)][ValidatePattern('^[0-9a-fA-F]{7,64}$')][string]$Commit,
-    [ValidateSet("x64")][string]$Architecture = "x64",
+    [ValidateSet("x64", "arm64")][string]$Architecture = "x64",
     [string]$IsccPath = ""
 )
 
@@ -72,7 +72,7 @@ if ($certificatePath) {
     Sign-Artifact (Join-Path $stage "LeoMoon SubFix.exe") $signTool
 }
 
-& $IsccPath "/Qp" "/DAppVersion=$Version" "/DStageDir=$stage" "/DOutputDir=$packageDirectory" "/DLicenseFile=$license" $installerScript
+& $IsccPath "/Qp" "/DAppVersion=$Version" "/DAppArchitecture=$Architecture" "/DStageDir=$stage" "/DOutputDir=$packageDirectory" "/DLicenseFile=$license" $installerScript
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
 $installer = Join-Path $packageDirectory "leomoon-subfix-$Version-windows-$Architecture-setup.exe"
 if ($signTool) { Sign-Artifact $installer $signTool }

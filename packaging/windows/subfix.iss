@@ -14,6 +14,9 @@
 #ifndef LicenseFile
   #error LicenseFile must be passed with /DLicenseFile.
 #endif
+#ifndef AppArchitecture
+  #error AppArchitecture must be passed with /DAppArchitecture.
+#endif
 
 [Setup]
 AppId={#AppId}
@@ -26,9 +29,9 @@ DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 LicenseFile={#LicenseFile}
 OutputDir={#OutputDir}
-OutputBaseFilename=leomoon-subfix-{#AppVersion}-windows-x64-setup
-ArchitecturesAllowed=x64compatible
-ArchitecturesInstallIn64BitMode=x64compatible
+OutputBaseFilename=leomoon-subfix-{#AppVersion}-windows-{#AppArchitecture}-setup
+ArchitecturesAllowed={#AppArchitecture}
+ArchitecturesInstallIn64BitMode={#AppArchitecture}
 CloseApplications=yes
 CloseApplicationsFilter={#AppExeName}
 RestartApplications=no

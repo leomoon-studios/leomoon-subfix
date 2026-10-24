@@ -137,23 +137,23 @@ jobs:
             --clean
 
       - name: Verify Windows PE dependencies
-        if: runner.os == 'Windows' && matrix.architecture == 'x64'
+        if: runner.os == 'Windows'
         shell: pwsh
         run: scripts/verify-windows-build.ps1 -ApplicationPath "build\manual-${{ matrix.platform }}\leomoon-subfix\LeoMoon SubFix.exe" -Architecture "${{ matrix.architecture }}"
 
       - name: Install Inno Setup
-        if: runner.os == 'Windows' && matrix.architecture == 'x64'
+        if: runner.os == 'Windows'
         shell: pwsh
         run: choco install innosetup --yes --no-progress
 
       - name: Package Windows installer
-        if: runner.os == 'Windows' && matrix.architecture == 'x64'
+        if: runner.os == 'Windows'
         shell: pwsh
         env:
           BUILD_VERSION: ${{ inputs.version }}
           BUILD_DATE: ${{ inputs.release_date }}
           BUILD_COMMIT: ${{ inputs.commit_sha || github.sha }}
-        run: '& scripts/package-windows.ps1 -StageDirectory "build\manual-windows-x64\leomoon-subfix" -DistDirectory "dist\manual-windows" -Version "$env:BUILD_VERSION" -ReleaseDate "$env:BUILD_DATE" -Commit "$env:BUILD_COMMIT"'
+        run: '& scripts/package-windows.ps1 -StageDirectory "build\manual-${{ matrix.platform }}\leomoon-subfix" -DistDirectory "dist\manual-windows-${{ matrix.architecture }}" -Version "$env:BUILD_VERSION" -ReleaseDate "$env:BUILD_DATE" -Commit "$env:BUILD_COMMIT" -Architecture "${{ matrix.architecture }}"'
 
       - name: Launch packaged application
         shell: bash
@@ -179,8 +179,8 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: leomoon-subfix-windows-installer-${{ github.sha }}
-          path: dist/manual-windows/
+          name: leomoon-subfix-windows-installer-${{ matrix.architecture }}-${{ github.sha }}
+          path: dist/manual-windows-${{ matrix.architecture }}/
           if-no-files-found: error
           retention-days: 14
 
@@ -196,7 +196,7 @@ jobs:
       - name: Download Windows installer
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          name: leomoon-subfix-windows-installer-${{ github.sha }}
+          name: leomoon-subfix-windows-installer-x64-${{ github.sha }}
           path: dist
 
       - name: Install, upgrade, convert, and uninstall
