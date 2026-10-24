@@ -45,7 +45,7 @@ if [[ -n "${SUBFIX_MACOS_CODESIGN_IDENTITY:-}" ]]; then
     done < <(find "$app/Contents" -type f -print0 | while IFS= read -r -d '' candidate; do file "$candidate" | grep -q 'Mach-O' && printf '%s\0' "$candidate"; done)
     codesign --force --options runtime --timestamp --sign "$SUBFIX_MACOS_CODESIGN_IDENTITY" "$app"
 else
-    codesign --force --sign - "$app"
+    echo "Producing an unsigned macOS application bundle."
 fi
 
 package_dir="$repo_dir/build/package/macos"
