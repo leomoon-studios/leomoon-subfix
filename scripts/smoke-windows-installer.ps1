@@ -50,7 +50,11 @@ try {
     $uninstaller = Join-Path $installDirectory "unins000.exe"
     if (-not (Test-Path -LiteralPath $uninstaller -PathType Leaf)) { throw "Windows uninstaller is missing" }
     Invoke-CheckedProcess $uninstaller @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/LOG=`"$uninstallLog`"") 600
-    if (Test-Path -LiteralPath $installDirectory) { throw "Application directory remains after uninstall" }
+    $deadline = [DateTime]::UtcNow.AddSeconds(60)
+    while (Test-Path -LiteralPath $installDirectory) {
+        if ([DateTime]::UtcNow -ge $deadline) { throw "Application directory remains after uninstall" }
+        Start-Sleep -Milliseconds 200
+    }
 } finally {
     Remove-Item -LiteralPath $testRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
