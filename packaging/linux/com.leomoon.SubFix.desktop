@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=LeoMoon SubFix
+Comment=Convert Windows-1256 subtitle files to UTF-8
+Exec=leomoon-subfix
+Icon=com.leomoon.SubFix
+Categories=Utility;
+Terminal=false
+StartupNotify=true
