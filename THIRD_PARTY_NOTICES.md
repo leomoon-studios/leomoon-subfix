@@ -12,4 +12,4 @@ The Qt for Python project and licensing information are available at <https://do
 
 ## DarkDetect
 
-LeoMoon SubFix vendors DarkDetect 0.8.0, copyright Alberto Sottile and contributors, from <https://github.com/albertosottile/darkdetect>. DarkDetect is licensed under the BSD 3-Clause License. Its copyright and license headers are retained in every vendored source file.
+LeoMoon SubFix uses DarkDetect 0.8.0, copyright Alberto Sottile and contributors, from <https://github.com/albertosottile/darkdetect>. DarkDetect is licensed under the BSD 3-Clause License.

@@ -8,14 +8,27 @@ version = "1.0.0"
 description = "Convert Windows-1256 subtitle files to UTF-8."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { file = "LICENSE" }
+license = "GPL-3.0-only"
 authors = [{ name = "LeoMoon Studios" }]
 classifiers = [
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = ["PySide6>=6.12,<7"]
+dependencies = [
+    "PySide6>=6.12,<7",
+    "darkdetect>=0.8,<0.9",
+]
+
+[project.optional-dependencies]
+build = [
+    "PyInstaller>=6,<7",
+    "uv>=0.5,<1",
+]
+test = [
+    "pytest>=9,<10",
+    "pytest-qt>=4.5,<5",
+    "ruff>=0.8,<1",
+]
 
 [project.gui-scripts]
 leomoon-subfix = "leomoon_subfix.app:main"
@@ -32,3 +45,14 @@ leomoon_subfix = ["assets/fonts/*.ttf", "assets/icons/*", "ui/*.qrc", "ui/*.ui"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["src/leomoon_subfix/_generated"]
+
+[tool.ruff.lint]
+select = ["F"]
+
+# Runtime dependencies are cross-platform. Future operating-system-specific
+# dependencies must use PEP 508 sys_platform markers in the appropriate group.

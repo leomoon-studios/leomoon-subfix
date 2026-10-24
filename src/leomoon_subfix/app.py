@@ -8,10 +8,10 @@ import os
 import sys
 import time #date and time
 from .converter import convert_subtitle
-from ._vendor.darkdetect import isDark #darkdetect 0.7.1 [ https://github.com/albertosottile/darkdetect ] 20220718
+from darkdetect import isDark
 from PySide6 import QtWidgets, QtCore, QtGui #qt stuff
 #local imports
-from .ui.main_window import Ui_main
+from ._generated.main_window import Ui_main
 
 title = 'LeoMoon SubFix'
 ver = '1.0.0'
@@ -78,7 +78,7 @@ class mainUi(QtWidgets.QMainWindow):
                 for url in event.mimeData().urls():
                     if os.path.isfile(str(url.toLocalFile())):
                         self._convert(str(url.toLocalFile())) #call _convert for every file
-            except Exception as error:
+            except Exception:
                 event.ignore()
         else:
             event.ignore()

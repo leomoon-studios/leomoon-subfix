@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import pytest
+import darkdetect
 
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -18,6 +19,12 @@ def qapp():
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     app.setStyle("Fusion")
     return app
+
+
+def test_uses_declared_darkdetect_dependency() -> None:
+    from leomoon_subfix import app
+
+    assert app.isDark is darkdetect.isDark
 
 
 def test_main_window_displays_version_and_converts_file(qapp, monkeypatch, tmp_path: Path) -> None:
