@@ -7,12 +7,16 @@ import pytest
 
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
+os.environ.setdefault("QT_QPA_PLATFORMTHEME", "")
+os.environ.setdefault("QT_STYLE_OVERRIDE", "Fusion")
+QtWidgets = pytest.importorskip("PySide6.QtWidgets")
 
 
 @pytest.fixture(scope="session")
 def qapp():
-    return QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    app.setStyle("Fusion")
+    return app
 
 
 def test_main_window_displays_version_and_converts_file(qapp, monkeypatch, tmp_path: Path) -> None:
