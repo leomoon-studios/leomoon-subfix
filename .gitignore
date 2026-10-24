@@ -138,4 +138,5 @@ metadata/
 
 # Generated application files
 src/leomoon_subfix/_generated/__pycache__/
+src/leomoon_subfix/_generated/resources_rc.py
 src/leomoon_subfix/_vendor/
