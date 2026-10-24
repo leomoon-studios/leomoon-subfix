@@ -1,5 +1,9 @@
-#custom
+# Editor and operating-system state
 .vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -35,6 +39,11 @@ MANIFEST
 *.manifest
 *.spec
 !packaging/pyinstaller/subfix.spec
+*.AppImage
+*.dmg
+*.pkg
+*.exe
+*.msi
 
 # Installer logs
 pip-log.txt
@@ -89,6 +98,7 @@ celerybeat-schedule
 # Environments
 .env
 .venv
+.venv/
 env/
 venv/
 ENV/
@@ -107,3 +117,25 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.ruff_cache/
+
+# Build, release, and signing state
+build/
+dist/
+release-input/
+release-assets/
+release-metadata.json
+release-notes.md
+metadata/
+*.p12
+*.pfx
+*.cer
+*.key
+*.pem
+*.mobileprovision
+*.keychain
+*.keychain-db
+
+# Generated application files
+src/leomoon_subfix/_generated/__pycache__/
+src/leomoon_subfix/_vendor/
